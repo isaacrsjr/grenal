@@ -155,17 +155,13 @@ tr.hl td:nth-child(2){font-weight:600}
 <script>
 (function(){
 var C=window.RebaixCore, GRE=C.GRE, INT=C.INT, FOCUS=[GRE,INT], SIMS=C.SIMS, SEED=C.SEED;
-var NAMES=C.NAMES;
-var TEAMS=Object.keys(NAMES);
-var BASE='https://site.api.espn.com/apis/site/v2/sports/soccer/bra.1/scoreboard';
+var NAMES=C.NAMES, TEAMS=C.TEAMS, weekKey=C.weekKey;
 var state={games:null, updatedAt:null, snaps:[], cur:null};
 var $=function(id){return document.getElementById(id)};
 function nm(t){return NAMES[t]||(state.teams&&state.teams[t])||t}
 function pct(p){if(p==null)return '—';var v=p*100;if(v>0&&v<0.1)return '<0,1%';if(v<100&&v>99.9)return '>99,9%';return v.toFixed(1).replace('.',',')+'%'}
 function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
 function fmtDate(iso,opt){try{return new Date(iso).toLocaleDateString('pt-BR',Object.assign({timeZone:'America/Sao_Paulo'},opt||{day:'2-digit',month:'2-digit'}))}catch(e){return iso.slice(0,10)}}
-function weekStartMs(ms){var d=new Date(ms-3*36e5);var day=(d.getUTCDay()+6)%7;return Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()-day)+3*36e5}
-function weekKey(ms){return new Date(weekStartMs(ms)).toISOString().slice(0,10)}
 function setStatus(t,cls){var s=$('status');s.textContent=t||'';s.className='status'+(cls?' '+cls:'')}
 function tick(){return new Promise(function(r){setTimeout(r,20)})}
 function withTimeout(p,ms,what){return Promise.race([p,new Promise(function(_,rej){setTimeout(function(){rej({code:'timeout',message:what})},ms)})])}

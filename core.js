@@ -29,7 +29,7 @@
     var from=new Date(Date.parse(lastCompleted(games))-2*864e5).toISOString().slice(0,10);
     var to=new Date(now+864e5).toISOString().slice(0,10);
     var cal=((j0.leagues&&j0.leagues[0]&&j0.leagues[0].calendar)||[]).map(function(c){return (typeof c==='string'?c:(c.startDate||c.value||'')).slice(0,10)});
-    var days=Array.from(new Set(cal)).filter(function(d){return d>=from&&d<=to}).sort().slice(-30);
+    var days=Array.from(new Set(cal)).filter(function(d){return d>=from&&d<=to}).sort();
     for(var i=0;i<days.length;i++){if(onProgress)onProgress(days[i],i,days.length);
       mergeEvents(games,await fetchJson(BASE+'?dates='+days[i].replace(/-/g,'')),found)}
     return found;

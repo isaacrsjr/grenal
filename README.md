@@ -21,7 +21,7 @@ Painel com a chance de Grêmio e Internacional caírem para a Série B no Brasil
 
 ## Como a atualização funciona
 
-- **Automática:** o GitHub Actions roda todo dia às 03h17 (Brasília). Ele busca os resultados novos, recalcula e grava em `data/games.json` e `data/snapshots.json`. Esse histórico é o que todo mundo que abre o site vê. O GitHub pausa tarefas agendadas de repositórios sem atividade por 60 dias.
+- **Automática:** o GitHub Actions roda todo dia às 03h17 (Brasília). Ele busca os resultados novos, recalcula e grava em `data/games.json` e `data/snapshots.json`. Esse histórico é o que todo mundo que abre o site vê. O GitHub pausa tarefas agendadas de repositórios sem atividade por 60 dias; por isso, se passarem 45 dias sem commit (ex.: entressafra), o próprio Actions grava um commit vazio para manter a agenda ativa.
 - **Botão "Atualizar resultados":** faz a mesma busca na hora, direto do navegador de quem clicou. O resultado fica salvo só nesse navegador, até a próxima atualização automática.
 
 ## Arquivos

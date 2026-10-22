@@ -28,9 +28,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
           git add data/
-          if git diff --cached --quiet; then
-            echo "Nada mudou."
-          else
+          if ! git diff --cached --quiet; then
             git commit -m "Atualiza resultados e probabilidades"
             git push
+          elif [ $(( $(date +%s) - $(git log -1 --format=%ct) )) -gt $(( 45 * 86400 )) ]; then
+            # O GitHub pausa o agendamento após 60 dias sem commits (ex.: entressafra)
+            git commit --allow-empty -m "Mantém a atualização automática ativa"
+            git push
+          else
+            echo "Nada mudou."
           fi
