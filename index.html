@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Chance de Grêmio e Internacional caírem para a Série B no Brasileirão 2026.">
+<title>Gre-Nal na Degola</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: placar de estádio — faixa de status, dois cartões (Grêmio | Inter), gráfico semanal, depois tabelas lado a lado */
+:root{
+  --bg:#f3f5f4; --panel:#ffffff; --ink:#15201c; --muted:#5d6a65; --line:#d9dfdc; --grid:#e7ebe9;
+  --gre:#0a78c2; --gre-soft:#e2f0fa; --int:#c8102e; --int-soft:#fbe5e8;
+  --z4:#fdf0ef; --z4-ink:#a3271b; --ok:#2f7d4f; --warn:#b06d00; --accent:#1d5e46;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1513; --panel:#171f1c; --ink:#e7eeeb; --muted:#97a59f; --line:#2a3531; --grid:#212b27;
+  --gre:#4fb0f0; --gre-soft:#12293a; --int:#ff5a6e; --int-soft:#35161b;
+  --z4:#2a1714; --z4-ink:#ff8f80; --ok:#5cc187; --warn:#e3a43b; --accent:#6cc9a0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1513; --panel:#171f1c; --ink:#e7eeeb; --muted:#97a59f; --line:#2a3531; --grid:#212b27;
+  --gre:#4fb0f0; --gre-soft:#12293a; --int:#ff5a6e; --int-soft:#35161b;
+  --z4:#2a1714; --z4-ink:#ff8f80; --ok:#5cc187; --warn:#e3a43b; --accent:#6cc9a0; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
+.wrap{max-width:1180px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
+.num{font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:var(--display);font-weight:700;margin:0;text-wrap:balance;letter-spacing:.01em}
+h1{font-size:clamp(30px,5vw,44px);line-height:1;text-transform:uppercase}
+h2{font-size:22px;text-transform:uppercase}
+.eyebrow{font-family:var(--display);font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.top{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between}
+.top .meta{color:var(--muted);font-size:14px;margin-top:6px}
+.refresh{display:flex;flex-direction:column;align-items:flex-end;gap:6px;max-width:100%}
+button.btn{font-family:var(--display);font-size:17px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:var(--accent);color:var(--bg);border:0;border-radius:6px;padding:10px 18px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+button.btn:hover{filter:brightness(1.08)}
+button.btn:focus-visible{outline:3px solid var(--gre);outline-offset:2px}
+button.btn[disabled]{opacity:.55;cursor:not-allowed}
+.status{font-size:13px;color:var(--muted);text-align:right;min-height:1.2em;max-width:420px}
+.status.err{color:var(--z4-ink)}
+.status.ok{color:var(--ok)}
+.spin{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite;display:none}
+.busy .spin{display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+.heroes{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.hero{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px;display:grid;grid-template-columns:1fr auto;gap:4px 16px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0 auto 0 0;width:6px;background:var(--c)}
+.hero.gre{--c:var(--gre);--soft:var(--gre-soft)} .hero.int{--c:var(--int);--soft:var(--int-soft)}
+.hero .club{font-family:var(--display);font-size:26px;font-weight:700;text-transform:uppercase;color:var(--c)}
+.hero .big{font-family:var(--display);font-weight:700;font-size:clamp(56px,9vw,84px);line-height:.9;grid-column:1}
+.hero .big small{font-size:.45em;margin-left:2px}
+.hero .delta{grid-column:1;font-size:14px;color:var(--muted)}
+.delta .up{color:var(--z4-ink);font-weight:600} .delta .down{color:var(--ok);font-weight:600}
+.hero .facts{grid-column:2;grid-row:1/span 3;display:flex;flex-direction:column;gap:8px;justify-content:center;text-align:right;font-size:13px;color:var(--muted)}
+.hero .facts b{display:block;font-family:var(--display);font-size:22px;color:var(--ink);font-weight:600;line-height:1}
+.pill{display:inline-block;font-family:var(--display);font-weight:600;font-size:13px;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:99px;background:var(--soft);color:var(--c);margin-left:8px;vertical-align:middle}
+.pill.z4{background:var(--z4);color:var(--z4-ink)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px;min-width:0}
+.card header{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between;margin-bottom:10px}
+.legend{display:flex;gap:14px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
+#chart{position:relative;width:100%}
+#chart svg{display:block;width:100%;height:auto}
+.tip{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.12);white-space:nowrap}
+.tip b{font-family:var(--display);font-size:15px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-family:var(--display);font-weight:600;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:right;padding:6px 6px;border-bottom:1px solid var(--line)}
+td{padding:5px 6px;text-align:right;border-bottom:1px solid var(--grid)}
+th:nth-child(2),td:nth-child(2){text-align:left}
+td:first-child{color:var(--muted);width:2.2em}
+tr.z4 td{background:var(--z4)}
+tr.z4 td:first-child{color:var(--z4-ink);font-weight:600}
+tr.hl td:nth-child(2){font-weight:600}
+.tname{display:inline-flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.bars{display:flex;flex-direction:column;gap:6px}
+.bar{display:grid;grid-template-columns:110px 1fr 56px;gap:10px;align-items:center;font-size:14px}
+.bar .track{height:12px;background:var(--grid);border-radius:3px;overflow:hidden}
+.bar .fill{height:100%;background:var(--muted);border-radius:3px}
+.bar.gre .fill{background:var(--gre)} .bar.int .fill{background:var(--int)}
+.bar .v{text-align:right;font-variant-numeric:tabular-nums}
+.bar .n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fx{display:flex;flex-direction:column;gap:10px}
+.fxrow{display:grid;grid-template-columns:62px 1fr;gap:4px 12px;align-items:center;font-size:14px}
+.fxrow .d{color:var(--muted);font-size:13px;grid-row:span 2}
+.wdl{display:flex;height:10px;border-radius:3px;overflow:hidden;background:var(--grid)}
+.wdl span{height:100%}
+.wdl .w{background:var(--ok)} .wdl .e{background:var(--muted);opacity:.45} .wdl .l{background:var(--z4-ink)}
+.fxp{font-size:12px;color:var(--muted)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.cols h3{font-size:18px;text-transform:uppercase;margin-bottom:8px}
+.empty{color:var(--muted);padding:24px 0;text-align:center}
+.note{font-size:13px;color:var(--muted);max-width:75ch}
+.note p{margin:.4em 0}
+@media (max-width:520px){.hero{grid-template-columns:1fr}.hero .facts{grid-column:1;grid-row:auto;flex-direction:row;flex-wrap:wrap;text-align:left;gap:14px;margin-top:8px}.refresh{align-items:flex-start}.status{text-align:left}.bar{grid-template-columns:90px 1fr 50px}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <div class="eyebrow">Brasileirão Série A 2026 · risco de queda</div>
+      <h1>Gre-Nal na Degola</h1>
+      <div class="meta num" id="meta">Carregando dados salvos…</div>
+    </div>
+    <div class="refresh">
+      <button class="btn" id="refreshBtn" type="button"><span class="spin"></span><span id="btnLabel">Atualizar resultados</span></button>
+      <div class="status" id="status" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <section class="heroes" id="heroes">
+    <article class="hero gre" id="hero-6273"></article>
+    <article class="hero int" id="hero-1936"></article>
+  </section>
+
+  <section class="card" id="evo">
+    <header>
+      <h2>Evolução semanal da chance de queda</h2>
+      <div class="legend"><span><i style="background:var(--gre)"></i>Grêmio</span><span><i style="background:var(--int)"></i>Internacional</span></div>
+    </header>
+    <div id="chart"><div class="empty">O histórico aparece aqui assim que os dados carregarem.</div></div>
+  </section>
+
+  <div class="grid2">
+    <section class="card" id="riskAll">
+      <header><h2>Risco de todos os clubes</h2><span class="eyebrow">Z-4 ao fim</span></header>
+      <div class="bars" id="bars"><div class="empty">—</div></div>
+    </section>
+    <section class="card" id="tableCard">
+      <header><h2>Classificação</h2><span class="eyebrow">pts projetados = média das simulações</span></header>
+      <div class="scroll"><table id="table"><thead><tr><th>#</th><th>Clube</th><th>J</th><th>P</th><th>V</th><th>SG</th><th>Proj.</th><th>Queda</th></tr></thead><tbody><tr><td colspan="8" class="empty">—</td></tr></tbody></table></div>
+    </section>
+  </div>
+
+  <section class="card" id="fixtures">
+    <header><h2>Jogos que faltam</h2><span class="eyebrow">chance de vitória · empate · derrota</span></header>
+    <div class="cols"><div><h3 style="color:var(--gre)">Grêmio</h3><div class="fx" id="fx-6273"></div></div><div><h3 style="color:var(--int)">Internacional</h3><div class="fx" id="fx-1936"></div></div></div>
+  </section>
+
+  <section class="note" id="method">
+    <p><b>Como é calculado.</b> Cada clube recebe uma força de ataque e de defesa estimada a partir de todos os jogos já disputados (modelo de Poisson, com mando de campo e peso maior para jogos recentes). Com isso, os jogos restantes são simulados 20.000 vezes; a chance de queda é a fração de simulações em que o clube termina entre o 17º e o 20º lugar (desempate: pontos, vitórias, saldo, gols pró).</p>
+    <p><b>Atualização.</b> Todo dia, de madrugada, o GitHub busca os resultados novos no placar público da ESPN, recalcula e grava o ponto da semana no gráfico (cada semana, de segunda a domingo, guarda o último cálculo feito nela). O botão Atualizar resultados faz a mesma busca na hora, direto do seu navegador; esse resultado fica salvo só neste navegador até a próxima atualização automática.</p>
+  </section>
+</div>
+
+<script src="model.js"></script>
+<script src="core.js"></script>
+<script>
+(function(){
+var C=window.RebaixCore, GRE=C.GRE, INT=C.INT, FOCUS=[GRE,INT], SIMS=C.SIMS, SEED=C.SEED;
+var NAMES=C.NAMES;
+var TEAMS=Object.keys(NAMES);
+var BASE='https://site.api.espn.com/apis/site/v2/sports/soccer/bra.1/scoreboard';
+var state={games:null, updatedAt:null, snaps:[], cur:null};
+var $=function(id){return document.getElementById(id)};
+function nm(t){return NAMES[t]||(state.teams&&state.teams[t])||t}
+function pct(p){if(p==null)return '—';var v=p*100;if(v>0&&v<0.1)return '<0,1%';if(v<100&&v>99.9)return '>99,9%';return v.toFixed(1).replace('.',',')+'%'}
+function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+function fmtDate(iso,opt){try{return new Date(iso).toLocaleDateString('pt-BR',Object.assign({timeZone:'America/Sao_Paulo'},opt||{day:'2-digit',month:'2-digit'}))}catch(e){return iso.slice(0,10)}}
+function weekStartMs(ms){var d=new Date(ms-3*36e5);var day=(d.getUTCDay()+6)%7;return Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()-day)+3*36e5}
+function weekKey(ms){return new Date(weekStartMs(ms)).toISOString().slice(0,10)}
+function setStatus(t,cls){var s=$('status');s.textContent=t||'';s.className='status'+(cls?' '+cls:'')}
+function tick(){return new Promise(function(r){setTimeout(r,20)})}
+function withTimeout(p,ms,what){return Promise.race([p,new Promise(function(_,rej){setTimeout(function(){rej({code:'timeout',message:what})},ms)})])}
+window.addEventListener('error',function(e){setStatus('Erro no painel: '+(e.message||'desconhecido'),'err')});
+window.addEventListener('unhandledrejection',function(e){var r=e.reason||{};setStatus('Erro no painel: '+(r.code||r.message||String(r)),'err')});
+
+/* ---------- render ---------- */
+function renderAll(){
+  var c=state.cur; if(!c) return;
+  var played=c.played, last=null;
+  Object.keys(state.games).forEach(function(k){var g=state.games[k];if(g[1]===1&&(!last||g[0]>last))last=g[0]});
+  $('meta').textContent=played+' de 380 jogos disputados · último resultado em '+(last?fmtDate(last,{day:'2-digit',month:'long'}):'—')+' · '+SIMS.toLocaleString('pt-BR')+' simulações';
+  var rank=TEAMS.slice().sort(function(a,b){var A=c.table[a],B=c.table[b];return B.p-A.p||B.w-A.w||B.gd-A.gd||B.gf-A.gf});
+  var snaps=state.snaps;
+  FOCUS.forEach(function(t){
+    var h=$('hero-'+t); h.textContent='';
+    var pos=rank.indexOf(t)+1, tb=c.table[t];
+    var name=el('div','club',nm(t)); var pill=el('span','pill'+(pos>=17?' z4':''),pos+'º lugar'+(pos>=17?' · Z-4':'')); name.appendChild(pill); h.appendChild(name);
+    var big=el('div','big num'); big.textContent=pct(c.probs[t]).replace('%',''); big.appendChild(el('small',null,'%')); h.appendChild(big);
+    var d=el('div','delta'); var prev=null;
+    for(var i=snaps.length-1;i>=0;i--){if(snaps[i].week<weekKey(Date.now())){prev=snaps[i];break}}
+    if(prev&&prev.probs&&prev.probs[t]!=null){var diff=(c.probs[t]-prev.probs[t])*100;var s=el('span',diff>0.05?'up':diff<-0.05?'down':'',(diff>0?'▲ ':diff<0?'▼ ':'')+Math.abs(diff).toFixed(1).replace('.',',')+' p.p.');d.appendChild(s);d.appendChild(document.createTextNode(' vs. semana de '+fmtDate(prev.week+'T12:00:00Z')));}
+    else d.textContent='chance de terminar no Z-4';
+    h.appendChild(d);
+    var f=el('div','facts');
+    function fact(label,val){var x=el('div');var b=el('b','num',val);x.appendChild(b);x.appendChild(document.createTextNode(label));f.appendChild(x)}
+    fact('pontos em '+tb.j+' jogos',String(tb.p));
+    fact('pontos projetados',c.expPts[t].toFixed(1).replace('.',','));
+    fact('jogos restantes',String(38-tb.j));
+    h.appendChild(f);
+  });
+  // bars
+  var bars=$('bars'); bars.textContent='';
+  TEAMS.slice().sort(function(a,b){return c.probs[b]-c.probs[a]}).filter(function(t){return c.probs[t]>=0.0005||FOCUS.indexOf(t)>=0}).forEach(function(t){
+    var r=el('div','bar'+(t===GRE?' gre':t===INT?' int':'')); r.appendChild(el('span','n',nm(t)));
+    var tr=el('div','track'),fi=el('div','fill');fi.style.width=(c.probs[t]*100)+'%';tr.appendChild(fi);r.appendChild(tr);r.appendChild(el('span','v',pct(c.probs[t])));bars.appendChild(r)});
+  // table
+  var tb=$('table').tBodies[0]; tb.textContent='';
+  rank.forEach(function(t,i){var r=c.table[t];var tr=el('tr',(i>=16?'z4':'')+(FOCUS.indexOf(t)>=0?' hl':''));
+    tr.appendChild(el('td','num',String(i+1)));var td=el('td');var sp=el('span','tname');var dot=el('span','dot');if(t===GRE)dot.style.background='var(--gre)';if(t===INT)dot.style.background='var(--int)';sp.appendChild(dot);sp.appendChild(document.createTextNode(nm(t)));td.appendChild(sp);tr.appendChild(td);
+    [r.j,r.p,r.w,(r.gd>0?'+':'')+r.gd,c.expPts[t].toFixed(1).replace('.',','),pct(c.probs[t])].forEach(function(v){tr.appendChild(el('td','num',String(v)))});tb.appendChild(tr)});
+  // fixtures
+  FOCUS.forEach(function(t){var box=$('fx-'+t);box.textContent='';
+    var list=c.remainingGames.filter(function(g){return g.h===t||g.a===t}).sort(function(a,b){return (a.date||'9')<(b.date||'9')?-1:1});
+    if(!list.length){box.appendChild(el('div','empty','Sem jogos restantes.'));return}
+    list.forEach(function(g){var home=g.h===t;var opp=home?g.a:g.h;var w=home?g.pH:g.pA,l=home?g.pA:g.pH,e=g.pD;
+      var row=el('div','fxrow');row.appendChild(el('div','d num',g.date?fmtDate(g.date):'a definir'));
+      row.appendChild(el('div',null,(home?'x ':'@ ')+nm(opp)+(home?' (casa)':' (fora)')));
+      var bar=el('div','wdl');[['w',w],['e',e],['l',l]].forEach(function(p){var s=el('span',p[0]);s.style.width=(p[1]*100)+'%';bar.appendChild(s)});
+      var wrap=el('div');wrap.appendChild(bar);wrap.appendChild(el('div','fxp num',Math.round(w*100)+'% · '+Math.round(e*100)+'% · '+Math.round(l*100)+'%'));row.appendChild(wrap);box.appendChild(row)})});
+  drawChart();
+}
+
+function drawChart(){
+  var box=$('chart'); var snaps=state.snaps.slice().sort(function(a,b){return a.week<b.week?-1:1});
+  if(!snaps.length){box.innerHTML='';box.appendChild(el('div','empty','Ainda não há semanas salvas. Clique em Atualizar resultados para gravar a primeira.'));return}
+  var W=Math.max(320,box.clientWidth||800),H=Math.round(Math.min(360,Math.max(240,W*0.38)));
+  var m={l:44,r:16,t:14,b:30},iw=W-m.l-m.r,ih=H-m.t-m.b;
+  var t0=Date.parse(snaps[0].week),t1=Date.parse(snaps[snaps.length-1].week);if(t1===t0)t1=t0+7*864e5;
+  var X=function(w){return m.l+(Date.parse(w)-t0)/(t1-t0)*iw},Y=function(p){return m.t+(1-p)*ih};
+  var NS='http://www.w3.org/2000/svg';function S(tag,attrs,parent){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);(parent||svg).appendChild(e);return e}
+  var svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.setAttribute('width','100%');svg.setAttribute('role','img');svg.setAttribute('aria-label','Chance de rebaixamento por semana de Grêmio e Internacional');
+  [0,.25,.5,.75,1].forEach(function(p){S('line',{x1:m.l,x2:W-m.r,y1:Y(p),y2:Y(p),stroke:'var(--grid)','stroke-width':1});var tx=S('text',{x:m.l-8,y:Y(p)+4,'text-anchor':'end','font-size':12,fill:'var(--muted)','font-family':'var(--body)'});tx.textContent=(p*100)+'%'});
+  // month ticks
+  var d=new Date(t0);d=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,1));var lastX=-99;
+  while(d.getTime()<=t1){var x=m.l+(d.getTime()-t0)/(t1-t0)*iw;if(x-lastX>34){var tx=S('text',{x:x,y:H-8,'text-anchor':'middle','font-size':12,fill:'var(--muted)','font-family':'var(--body)'});tx.textContent=d.toLocaleDateString('pt-BR',{month:'short',timeZone:'UTC'}).replace('.','');S('line',{x1:x,x2:x,y1:m.t+ih,y2:m.t+ih+4,stroke:'var(--line)'});lastX=x}d=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,1))}
+  // pause band (gaps > 3 weeks)
+  for(var i=1;i<snaps.length;i++){var a=Date.parse(snaps[i-1].week),b=Date.parse(snaps[i].week);if(b-a>21*864e5){var xa=X(snaps[i-1].week),xb=X(snaps[i].week);S('rect',{x:xa,y:m.t,width:xb-xa,height:ih,fill:'var(--grid)',opacity:.6});var tx=S('text',{x:(xa+xb)/2,y:m.t+14,'text-anchor':'middle','font-size':11,fill:'var(--muted)','font-family':'var(--body)'});tx.textContent='pausa (Copa)'}}
+  S('line',{x1:m.l,x2:W-m.r,y1:m.t+ih,y2:m.t+ih,stroke:'var(--line)'});
+  [[GRE,'var(--gre)'],[INT,'var(--int)']].forEach(function(s){var pts=snaps.map(function(q){return [X(q.week),Y(q.probs[s[0]]||0)]});
+    var area='M'+pts[0][0]+','+(m.t+ih)+pts.map(function(p){return 'L'+p[0]+','+p[1]}).join('')+'L'+pts[pts.length-1][0]+','+(m.t+ih)+'Z';
+    S('path',{d:area,fill:s[1],opacity:.07});
+    S('path',{d:'M'+pts.map(function(p){return p[0]+','+p[1]}).join('L'),fill:'none',stroke:s[1],'stroke-width':2.5,'stroke-linejoin':'round','stroke-linecap':'round'});
+    var lp=pts[pts.length-1];S('circle',{cx:lp[0],cy:lp[1],r:4.5,fill:s[1],stroke:'var(--panel)','stroke-width':2})});
+  var guide=S('line',{x1:0,x2:0,y1:m.t,y2:m.t+ih,stroke:'var(--muted)','stroke-dasharray':'3 3',opacity:0});
+  var dg=S('circle',{r:4,fill:'var(--gre)',opacity:0}),di=S('circle',{r:4,fill:'var(--int)',opacity:0});
+  var hit=S('rect',{x:m.l,y:m.t,width:iw,height:ih,fill:'transparent'});
+  box.textContent='';box.appendChild(svg);var tip=el('div','tip');tip.hidden=true;box.appendChild(tip);
+  function show(evt){var r=svg.getBoundingClientRect();var sx=(evt.clientX-r.left)*W/r.width;var best=0,bd=1e9;snaps.forEach(function(q,i){var dd=Math.abs(X(q.week)-sx);if(dd<bd){bd=dd;best=i}});var q=snaps[best],x=X(q.week);
+    guide.setAttribute('x1',x);guide.setAttribute('x2',x);guide.setAttribute('opacity',.6);
+    dg.setAttribute('cx',x);dg.setAttribute('cy',Y(q.probs[GRE]));dg.setAttribute('opacity',1);di.setAttribute('cx',x);di.setAttribute('cy',Y(q.probs[INT]));di.setAttribute('opacity',1);
+    tip.textContent='';tip.appendChild(el('b',null,'Semana de '+fmtDate(q.week+'T12:00:00Z')));tip.appendChild(el('div','num',q.played+' jogos disputados'));
+    var a=el('div','num');a.style.color='var(--gre)';a.textContent='Grêmio '+pct(q.probs[GRE]);tip.appendChild(a);var b=el('div','num');b.style.color='var(--int)';b.textContent='Inter '+pct(q.probs[INT]);tip.appendChild(b);
+    tip.hidden=false;var px=x*r.width/W,tw=tip.offsetWidth;tip.style.left=Math.max(0,Math.min(r.width-tw,px+12>r.width-tw?px-tw-12:px+12))+'px';tip.style.top='10px'}
+  hit.addEventListener('pointermove',show);hit.addEventListener('pointerdown',show);hit.addEventListener('pointerleave',function(){tip.hidden=true;guide.setAttribute('opacity',0);dg.setAttribute('opacity',0);di.setAttribute('opacity',0)});
+}
+var rT;window.addEventListener('resize',function(){clearTimeout(rT);rT=setTimeout(drawChart,150)});
+
+/* ---------- compute ---------- */
+
+var LS_G='gn_games_v1', LS_S='gn_snaps_v1';
+function lsGet(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function countDone(g){var n=0;for(var k in g)if(g[k][1]===1)n++;return n}
+function compute(cutoff){return window.RebaixModel.run(state.games,TEAMS,cutoff,SIMS,SEED)}
+function sortSnaps(a){return a.sort(function(x,y){return x.week<y.week?-1:1})}
+async function getJSON(u){var r=await fetch(u+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw {code:'http',message:u+' respondeu '+r.status};return r.json()}
+function updatedLine(){return state.updatedAt?'Dados de '+fmtDate(state.updatedAt,{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' · fonte: '+state.source:''}
+
+async function load(){
+  try{
+    var g=await getJSON('data/games.json'), s=await getJSON('data/snapshots.json');
+    var lg=lsGet(LS_G), ls=lsGet(LS_S)||[];
+    state.games=g.games;state.updatedAt=g.updatedAt;state.source='atualização automática';
+    if(lg&&lg.games&&(countDone(lg.games)>countDone(g.games)||(countDone(lg.games)===countDone(g.games)&&(lg.updatedAt||'')>(g.updatedAt||'')))){state.games=lg.games;state.updatedAt=lg.updatedAt;state.source='este navegador'}
+    var by={};s.concat(ls).forEach(function(x){var c=by[x.week];if(!c||x.played>c.played||(x.played===c.played&&(x.updatedAt||'')>(c.updatedAt||'')))by[x.week]=x});
+    state.snaps=sortSnaps(Object.keys(by).map(function(k){return by[k]}));
+    setStatus('Simulando '+SIMS.toLocaleString('pt-BR')+' temporadas…');await tick();
+    state.cur=compute(Date.now());setStatus(updatedLine());renderAll();
+  }catch(e){$('meta').textContent='Não consegui carregar os dados do painel ('+(e&&e.message||e)+'). Recarregue a página.'}
+}
+
+async function refresh(){
+  var btn=$('refreshBtn');if(btn.disabled)return;
+  if(!state.games){setStatus('Os dados ainda não carregaram.','err');return}
+  btn.disabled=true;btn.classList.add('busy');$('btnLabel').textContent='Atualizando…';
+  try{
+    var fetchJson=function(u){return withTimeout(fetch(u,{cache:'no-store'}).then(function(r){if(!r.ok)throw {code:'http',message:'a ESPN respondeu '+r.status};return r.json()}),30000,'ESPN')};
+    setStatus('Buscando resultados na ESPN…');
+    var games=JSON.parse(JSON.stringify(state.games));
+    var found=await RebaixCore.fetchUpdates(games,fetchJson,Date.now(),function(d,i,n){setStatus('Lendo jogos de '+fmtDate(d+'T15:00:00Z')+' ('+(i+1)+'/'+n+')…')});
+    state.games=games;
+    setStatus('Simulando '+SIMS.toLocaleString('pt-BR')+' temporadas…');await tick();
+    var res=await RebaixCore.updateSnapshots(games,state.snaps,Date.now(),window.RebaixModel,'navegador',tick);
+    state.snaps=res.snaps;state.cur=res.cur;state.updatedAt=new Date().toISOString();state.source='este navegador';
+    lsSet(LS_G,{games:games,updatedAt:state.updatedAt});lsSet(LS_S,res.snaps);
+    renderAll();
+    setStatus((found.length?found.length+' resultado(s) novo(s): '+found.slice(0,4).join(', ')+(found.length>4?'…':'')+'.':'Nenhum resultado novo. Probabilidades recalculadas.')+' Salvo neste navegador.','ok');
+  }catch(e){
+    var c=e&&e.code;
+    var msg=c==='timeout'?'A ESPN não respondeu em 30 s. Tente de novo em alguns minutos.':
+      (e instanceof TypeError)?'Não consegui acessar o placar da ESPN (rede ou bloqueio do navegador). Confira a conexão e tente de novo.':
+      'A atualização falhou: '+(e&&e.message||c||e)+'.';
+    setStatus(msg,'err');
+  }finally{btn.disabled=false;btn.classList.remove('busy');$('btnLabel').textContent='Atualizar resultados'}
+}
+$('refreshBtn').addEventListener('click',refresh);
+load();
+})();
+</script>
+</body>
+</html>
