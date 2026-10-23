@@ -3,7 +3,7 @@
 Painel com a chance de Grêmio e Internacional caírem para a Série B no Brasileirão 2026.
 
 - **Modelo:** força de ataque e defesa de cada clube (Poisson, com mando de campo e peso maior para jogos recentes) e 20.000 simulações dos jogos restantes. Rebaixamento = terminar entre o 17º e o 20º lugar.
-- **Dados:** placar público da ESPN (`site.api.espn.com`).
+- **Dados:** placar público da ESPN (`site.api.espn.com`). Os escudos também vêm da ESPN (`a.espncdn.com`).
 
 ## Como publicar no GitHub Pages
 
