@@ -1,14 +1,56 @@
 # Gre-Nal na Degola
 
-Painel com a chance de Grêmio e Internacional caírem para a Série B no Brasileirão 2026.
+Painel com a chance de Grêmio e Internacional caírem para a Série B no Brasileirão 2026. É um site estático (HTML + JS puro, sem build nem dependências), publicado no GitHub Pages e atualizado todo dia pelo GitHub Actions.
 
-- **Modelo:** força de ataque e defesa de cada clube (Poisson, com mando de campo e peso maior para jogos recentes) e 20.000 simulações dos jogos restantes. Rebaixamento = terminar entre o 17º e o 20º lugar.
-- **Dados:** placar público da ESPN (`site.api.espn.com`). Os escudos também vêm da ESPN (`a.espncdn.com`).
+## O que o painel mostra
+
+- **Chance de queda** de Grêmio e Inter: posição atual, variação em relação à semana anterior, pontos atuais e projetados, e a distribuição da posição final nas simulações.
+- **Evolução semanal** dessa chance ao longo do campeonato.
+- **Risco de todos os clubes** de terminar no Z-4.
+- **Classificação** atual, com pontos projetados (média das simulações).
+- **Jogos que faltam** para a dupla Gre-Nal, com chance de vitória, empate e derrota em cada um.
+
+Passe o mouse sobre gráficos e tabelas para ver os detalhes. Os escudos vêm da ESPN (`a.espncdn.com`).
+
+## Como é calculado
+
+1. **Força dos clubes:** cada time recebe uma força de ataque e uma de defesa, estimadas por um modelo de Poisson a partir dos jogos já disputados, com mando de campo. Jogos recentes pesam mais (meia-vida de 180 dias), e todo clube começa com o equivalente a 10 jogos "médios", para o modelo não exagerar no início do campeonato.
+2. **Simulação:** os jogos restantes são simulados 20.000 vezes (Monte Carlo, com semente fixa, então o mesmo conjunto de jogos sempre dá o mesmo resultado).
+3. **Rebaixamento:** fração das simulações em que o clube termina entre o 17º e o 20º lugar. Desempate: pontos, vitórias, saldo, gols pró e, por fim, sorteio.
+
+Os parâmetros ficam no topo de `model.js` (`HALF_LIFE_DAYS`, `PRIOR_GAMES`) e de `core.js` (`SIMS`, `SEED`).
+
+## Rodar localmente
+
+A página carrega `data/*.json` com `fetch`, então precisa de um servidor HTTP. Abrir o `index.html` direto (`file://`) não funciona.
+
+```bash
+python3 -m http.server 8000
+# ou: npx serve .
+```
+
+Depois é só abrir `http://localhost:8000`.
+
+Para atualizar os dados na sua máquina (Node 18+, sem `npm install`):
+
+```bash
+node scripts/update.js
+```
+
+O script busca os resultados novos na ESPN, recalcula e regrava `data/games.json` e `data/snapshots.json`. É o mesmo que o Actions roda.
+
+## Como a atualização funciona
+
+- **Automática:** o GitHub Actions roda todo dia às 03h17 (Brasília), busca os resultados novos, recalcula e faz commit em `data/`. Esse histórico é o que todo mundo que abre o site vê. O GitHub pausa tarefas agendadas de repositórios sem atividade por 60 dias; por isso, se passarem 45 dias sem commit (ex.: entressafra), o próprio Actions grava um commit vazio para manter a agenda ativa.
+- **Botão "Atualizar resultados":** faz a mesma busca na hora, direto do navegador de quem clicou. O resultado fica salvo só nesse navegador (`localStorage`), até a próxima atualização automática.
+- **Histórico semanal:** cada semana (segunda a domingo, horário de Brasília) guarda o último cálculo feito nela. Se alguma semana ficar sem atualização, o ponto dela é recalculado retroativamente com os jogos daquela época.
+
+Fonte dos placares: API pública da ESPN (`site.api.espn.com`, liga `bra.1`).
 
 ## Como publicar no GitHub Pages
 
 1. Crie um repositório público no GitHub (ex.: `gre-nal-na-degola`).
-2. Envie todos os arquivos desta pasta, **incluindo a pasta oculta `.github`**. Pelo site: *Add file → Upload files* e arraste o conteúdo da pasta. Pelo terminal:
+2. Envie todos os arquivos desta pasta, **incluindo a pasta oculta `.github`** e o arquivo `.nojekyll`. Pelo site: *Add file → Upload files* e arraste o conteúdo da pasta. Pelo terminal:
    ```bash
    git init && git add . && git commit -m "Painel Gre-Nal na Degola"
    git branch -M main
@@ -19,18 +61,24 @@ Painel com a chance de Grêmio e Internacional caírem para a Série B no Brasil
 4. Em **Settings → Actions → General → Workflow permissions**, marque **Read and write permissions**, para a atualização automática conseguir salvar os dados.
 5. Em **Actions → Atualizar resultados → Run workflow**, rode uma vez para testar.
 
-## Como a atualização funciona
-
-- **Automática:** o GitHub Actions roda todo dia às 03h17 (Brasília). Ele busca os resultados novos, recalcula e grava em `data/games.json` e `data/snapshots.json`. Esse histórico é o que todo mundo que abre o site vê. O GitHub pausa tarefas agendadas de repositórios sem atividade por 60 dias; por isso, se passarem 45 dias sem commit (ex.: entressafra), o próprio Actions grava um commit vazio para manter a agenda ativa.
-- **Botão "Atualizar resultados":** faz a mesma busca na hora, direto do navegador de quem clicou. O resultado fica salvo só nesse navegador, até a próxima atualização automática.
-
 ## Arquivos
 
 | Arquivo | O que é |
 |---|---|
-| `index.html` | a página |
-| `model.js` | modelo e simulação |
-| `core.js` | busca na ESPN e cálculo do histórico semanal (usado pela página e pelo Actions) |
+| `index.html` | a página (HTML, CSS e o código da interface) |
+| `model.js` | modelo de Poisson e simulação Monte Carlo |
+| `core.js` | clubes, busca na ESPN e cálculo do histórico semanal (usado pela página e pelo Actions) |
 | `scripts/update.js` | script do Actions (`node scripts/update.js`, Node 18+) |
 | `.github/workflows/atualizar.yml` | agenda diária |
-| `data/` | jogos e histórico semanal |
+| `data/games.json` | todos os jogos: `"mandante-visitante": [data, encerrado (0/1), gols mandante, gols visitante]`, com os IDs de clube da ESPN |
+| `data/snapshots.json` | um ponto por semana: chance de queda e pontos esperados de cada clube |
+| `.nojekyll` | faz o GitHub Pages servir os arquivos sem processar com Jekyll |
+
+## Para outra temporada
+
+Os clubes estão fixos em `NAMES`, no topo de `core.js` (ID da ESPN → nome), e Grêmio (`6273`) e Inter (`1936`) aparecem nas constantes `GRE` e `INT`. Para uma nova temporada:
+
+1. Atualize a lista de clubes em `core.js` (os IDs aparecem na resposta da API da ESPN).
+2. Troque o ano nos textos de `index.html` (`<meta name="description">` e o subtítulo "Brasileirão Série A 2026").
+3. Zere os dados: `data/games.json` com `{"games": {}}` e `data/snapshots.json` com `[]`.
+4. Rode `node scripts/update.js`. O gráfico semanal recomeça a partir da semana atual.
