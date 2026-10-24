@@ -77,6 +77,12 @@ tr.z4 td{background:var(--z4)}
 tr.z4 td:first-child{color:var(--z4-ink);font-weight:600}
 tr.hl td:nth-child(2){font-weight:600}
 .tname{display:inline-flex;align-items:center;gap:6px}
+td:first-child{white-space:nowrap}
+.mv{font-size:11px;font-weight:600;margin-left:3px}
+.mv.up{color:var(--ok)} .mv.down{color:var(--z4-ink)}
+.tlive{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:0 6px;border-radius:99px;background:var(--grid);font-variant-numeric:tabular-nums}
+.tlive .ldot{width:6px;height:6px}
+.tlive.w{color:var(--ok)} .tlive.d{color:var(--muted)} .tlive.l{color:var(--z4-ink)}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--line)}
 .bars{display:flex;flex-direction:column;gap:6px}
 .bar{display:grid;grid-template-columns:110px 1fr 56px;gap:10px;align-items:center;font-size:14px}
@@ -213,7 +219,7 @@ tbody tr.z4:hover td{filter:brightness(.97)}
       <div class="bars" id="bars"><div class="empty">—</div></div>
     </section>
     <section class="card" id="tableCard">
-      <header><h2>Classificação</h2><span class="eyebrow">pts projetados = média das simulações</span></header>
+      <header><h2>Classificação</h2><span class="eyebrow" id="tableNote">pts projetados = média das simulações</span></header>
       <div class="scroll"><table id="table"><thead><tr><th>#</th><th>Clube</th><th>J</th><th>P</th><th>V</th><th>SG</th><th>Proj.</th><th>Queda</th></tr></thead><tbody><tr><td colspan="8" class="empty">—</td></tr></tbody></table></div>
     </section>
   </div>
@@ -276,14 +282,25 @@ function tipCard(t,title,sub,rows){var d=el('div'),h=el('div','tip-h');if(t)h.ap
     var row=el('div','tip-r'),k=el('span','k');if(r[3])k.appendChild(crest(r[3],16));k.appendChild(document.createTextNode(r[0]));if(r[2])k.style.color=r[2];
     row.appendChild(k);row.appendChild(el('span','v',r[1]));d.appendChild(row)});
   return d}
+/* ---------- classificação de agora: resultados finais + placar dos jogos em andamento ---------- */
+function liveTable(c){var t={};TEAMS.forEach(function(k){var b=c.table[k];t[k]={p:b.p,w:b.w,gd:b.gd,gf:b.gf,j:b.j}});
+  Object.keys(state.live||{}).forEach(function(k){var L=state.live[k],ab=k.split('-'),H=t[ab[0]],A=t[ab[1]];if(!H||!A)return;
+    H.j++;A.j++;H.gf+=L.hs;A.gf+=L.as;H.gd+=L.hs-L.as;A.gd+=L.as-L.hs;if(L.hs>L.as){H.p+=3;H.w++}else if(L.hs<L.as){A.p+=3;A.w++}else{H.p++;A.p++}});
+  return t}
+function rankOf(tb){return TEAMS.slice().sort(function(a,b){var A=tb[a],B=tb[b];return B.p-A.p||B.w-A.w||B.gd-A.gd||B.gf-A.gf})}
+/* jogo em andamento do clube, do ponto de vista dele: {gf, ga, opp, home, detail} */
+function liveOf(t){var ks=Object.keys(state.live||{});for(var i=0;i<ks.length;i++){var ab=ks[i].split('-'),L=state.live[ks[i]];
+  if(ab[0]===t)return {gf:L.hs,ga:L.as,opp:ab[1],home:true,detail:L.detail};if(ab[1]===t)return {gf:L.as,ga:L.hs,opp:ab[0],home:false,detail:L.detail}}return null}
 function bestPos(c,t){var ph=c.posHist[t],b=0;for(var i=1;i<ph.length;i++)if(ph[i]>ph[b])b=i;return [b+1,ph[b]]}
-function teamTip(t){var c=state.cur,r=c.table[t],pos=state.rank.indexOf(t)+1,bp=bestPos(c,t);
-  return tipCard(t,nm(t),ord(pos)+' lugar · '+r.p+' pts em '+r.j+' jogos',[
+function teamTip(t){var c=state.cur,r=state.lt[t],pos=state.rank.indexOf(t)+1,bp=bestPos(c,t),lv=liveOf(t),extra=[];
+  if(lv)extra=[['Ao vivo: '+(lv.home?nm(t)+' '+lv.gf+'×'+lv.ga+' '+nm(lv.opp):nm(lv.opp)+' '+lv.ga+'×'+lv.gf+' '+nm(t)),lv.detail,'var(--z4-ink)'],
+    ['Posição sem esse jogo',ord(state.rank0.indexOf(t)+1)],'sep'];
+  return tipCard(t,nm(t),ord(pos)+' lugar · '+r.p+' pts em '+r.j+' jogos'+(lv?' (com o placar de agora)':''),extra.concat([
     ['Chance de queda',pct(c.probs[t]),'var(--z4-ink)'],
     ['Pontos projetados',pp(c.expPts[t])],
     ['Posição mais provável',ord(bp[0])+' ('+pct(bp[1])+')'],'sep',
     ['Vitórias · saldo',r.w+' · '+(r.gd>0?'+':'')+r.gd],
-    ['Jogos restantes',String(38-r.j)]])}
+    ['Jogos restantes',String(38-r.j)]]))}
 function fmtDate(iso,opt){try{return new Date(iso).toLocaleDateString('pt-BR',Object.assign({timeZone:'America/Sao_Paulo'},opt||{day:'2-digit',month:'2-digit'}))}catch(e){return iso.slice(0,10)}}
 function setStatus(t,cls){var s=$('status');s.textContent=t||'';s.className='status'+(cls?' '+cls:'')}
 function tick(){return new Promise(function(r){setTimeout(r,20)})}
@@ -298,13 +315,13 @@ function renderAll(){
   Object.keys(state.games).forEach(function(k){var g=state.games[k];if(g[1]===1&&(!last||g[0]>last))last=g[0]});
   $('meta').textContent=played+' de 380 jogos disputados · último resultado em '+(last?fmtDate(last,{day:'2-digit',month:'long'}):'—')+' · '+SIMS.toLocaleString('pt-BR')+' simulações'+(c.live?' · '+c.live+(c.live>1?' jogos':' jogo')+' ao vivo no cálculo':'');
   renderLive();
-  var rank=TEAMS.slice().sort(function(a,b){var A=c.table[a],B=c.table[b];return B.p-A.p||B.w-A.w||B.gd-A.gd||B.gf-A.gf});
-  var snaps=state.snaps; state.rank=rank;
+  var lt=liveTable(c),rank=rankOf(lt),rank0=rankOf(c.table),nLive=Object.keys(state.live||{}).length;
+  var snaps=state.snaps; state.rank=rank; state.rank0=rank0; state.lt=lt;
   var duo=$('duo'); if(!duo.firstChild){duo.appendChild(crest(GRE,40));duo.appendChild(crest(INT,40))}
   FOCUS.forEach(function(t){
     var h=$('hero-'+t); h.textContent='';
     h.appendChild(crest(t,190,'wm'));
-    var pos=rank.indexOf(t)+1, tb=c.table[t];
+    var pos=rank.indexOf(t)+1, tb=lt[t];
     var name=el('div','club'); name.appendChild(crest(t,44)); name.appendChild(el('span',null,nm(t))); var pill=el('span','pill'+(pos>=17?' z4':''),pos+'º lugar'+(pos>=17?' · Z-4':'')); name.appendChild(pill); h.appendChild(name);
     var big=el('div','big num'); big.textContent=pct(c.probs[t]).replace('%',''); big.appendChild(el('small',null,'%')); h.appendChild(big);
     var d=el('div','delta'); var prev=null;
@@ -314,9 +331,10 @@ function renderAll(){
     h.appendChild(d);
     var f=el('div','facts');
     function fact(label,val){var x=el('div');var b=el('b','num',val);x.appendChild(b);x.appendChild(document.createTextNode(label));f.appendChild(x)}
-    fact('pontos em '+tb.j+' jogos',String(tb.p));
+    var playing=liveOf(t);
+    fact(playing?'pontos agora, com o jogo em andamento':'pontos em '+tb.j+' jogos',String(tb.p));
     fact('pontos projetados',c.expPts[t].toFixed(1).replace('.',','));
-    fact('jogos restantes',String(38-tb.j));
+    fact(playing?'jogos restantes, contando o de agora':'jogos restantes',String(38-c.table[t].j));
     h.appendChild(f);
     // onde termina: distribuição das 20 posições nas simulações
     var ph=c.posHist[t], mx=Math.max.apply(null,ph), dist=el('div','dist'), cols=el('div','cols20');
@@ -336,8 +354,12 @@ function renderAll(){
     bindTip(r,function(){return teamTip(t)});bars.appendChild(r)});
   // table
   var tb=$('table').tBodies[0]; tb.textContent='';
-  rank.forEach(function(t,i){var r=c.table[t];var tr=el('tr',(i>=16?'z4':'')+(FOCUS.indexOf(t)>=0?' hl':''));
-    tr.appendChild(el('td','num',String(i+1)));var td=el('td');var sp=el('span','tname');sp.appendChild(crest(t,20));sp.appendChild(document.createTextNode(nm(t)));td.appendChild(sp);tr.appendChild(td);
+  $('tableNote').textContent=nLive?'agora · com os placares ao vivo':'pts projetados = média das simulações';
+  rank.forEach(function(t,i){var r=lt[t];var tr=el('tr',(i>=16?'z4':'')+(FOCUS.indexOf(t)>=0?' hl':''));
+    var tdp=el('td','num',String(i+1)),mv=rank0.indexOf(t)-i;if(mv)tdp.appendChild(el('span','mv '+(mv>0?'up':'down'),(mv>0?'▲':'▼')+Math.abs(mv)));tr.appendChild(tdp);
+    var td=el('td');var sp=el('span','tname');sp.appendChild(crest(t,20));sp.appendChild(document.createTextNode(nm(t)));
+    var lv=liveOf(t);if(lv){var b=el('span','tlive '+(lv.gf>lv.ga?'w':lv.gf<lv.ga?'l':'d'));b.appendChild(el('span','ldot'));b.appendChild(document.createTextNode(lv.gf+'×'+lv.ga));sp.appendChild(b)}
+    td.appendChild(sp);tr.appendChild(td);
     [r.j,r.p,r.w,(r.gd>0?'+':'')+r.gd,c.expPts[t].toFixed(1).replace('.',','),pct(c.probs[t])].forEach(function(v){tr.appendChild(el('td','num',String(v)))});
     bindTip(tr,function(){return teamTip(t)},false);tb.appendChild(tr)});
   simCompute();renderSim();
@@ -447,7 +469,7 @@ function renderSim(pending){
       var o=el('div','opp');o.appendChild(el('span','d',g.date?fmtDate(g.date):'a definir'));o.appendChild(document.createTextNode(home?'x':'@'));o.appendChild(crest(opp,20));o.appendChild(document.createTextNode(nm(opp)+(home?' (casa)':' (fora)')));
       if(g.live){var lb=el('span','livebadge');lb.appendChild(el('span','ldot'));lb.appendChild(document.createTextNode('ao vivo '+g.live.hs+'×'+g.live.as+' · '+g.live.detail));o.appendChild(lb)}
       row.appendChild(o);
-      bindTip(o,function(){var oc=c.table[opp],op=state.rank.indexOf(opp)+1;
+      bindTip(o,function(){var oc=state.lt[opp],op=state.rank.indexOf(opp)+1;
         return tipCard(null,nm(g.h)+' x '+nm(g.a),g.date?fmtDate(g.date,{weekday:'long',day:'2-digit',month:'long',hour:'2-digit',minute:'2-digit'}):'data a definir',[
           [nm(opp)+' · '+ord(op),oc.p+' pts',null,opp],['Chance de queda dele',pct(c.probs[opp])]])},false);
       var pk=el('div','pick');
