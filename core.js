@@ -9,11 +9,13 @@
   function weekStartMs(ms){var d=new Date(ms-3*36e5);var day=(d.getUTCDay()+6)%7;return Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()-day)+3*36e5}
   function weekKey(ms){return new Date(weekStartMs(ms)).toISOString().slice(0,10)}
 
-  function mergeEvents(games, json, found){
+  /* live (opcional): recebe os jogos em andamento, { "h-a": {hs, as, min, detail} }; nunca vai para games */
+  function mergeEvents(games, json, found, live){
     var n=0;(json.events||[]).forEach(function(e){try{
       var c=e.competitions[0];
       var h=c.competitors.find(function(x){return x.homeAway==='home'}),a=c.competitors.find(function(x){return x.homeAway==='away'});
-      var k=h.team.id+'-'+a.team.id;var done=e.status&&e.status.type&&e.status.type.completed?1:0;var cur=games[k];
+      var k=h.team.id+'-'+a.team.id;var st=e.status||{},ty=st.type||{};var done=ty.completed?1:0;var cur=games[k];
+      if(live){if(!done&&ty.state==='in')live[k]={hs:+h.score||0,as:+a.score||0,min:Math.min(90,(+st.clock||0)/60),detail:ty.shortDetail||st.displayClock||''};else delete live[k]}
       if(cur&&cur[1]===1&&!done)return;
       var nv=[e.date,done,done?+h.score:0,done?+a.score:0];
       if(!cur||cur[0]!==nv[0]||cur[1]!==nv[1]||cur[2]!==nv[2]||cur[3]!==nv[3]){
@@ -24,14 +26,14 @@
   function lastCompleted(games){var l='2026-01-01';Object.keys(games).forEach(function(k){var g=games[k];if(g[1]===1&&g[0]>l)l=g[0]});return l}
 
   /* Busca na ESPN os dias desde o último resultado salvo. fetchJson(url) -> Promise<json> */
-  async function fetchUpdates(games, fetchJson, now, onProgress){
-    var found=[];var j0=await fetchJson(BASE);mergeEvents(games,j0,found);
+  async function fetchUpdates(games, fetchJson, now, onProgress, live){
+    var found=[];var j0=await fetchJson(BASE);mergeEvents(games,j0,found,live);
     var from=new Date(Date.parse(lastCompleted(games))-2*864e5).toISOString().slice(0,10);
     var to=new Date(now+864e5).toISOString().slice(0,10);
     var cal=((j0.leagues&&j0.leagues[0]&&j0.leagues[0].calendar)||[]).map(function(c){return (typeof c==='string'?c:(c.startDate||c.value||'')).slice(0,10)});
     var days=Array.from(new Set(cal)).filter(function(d){return d>=from&&d<=to}).sort();
     for(var i=0;i<days.length;i++){if(onProgress)onProgress(days[i],i,days.length);
-      mergeEvents(games,await fetchJson(BASE+'?dates='+days[i].replace(/-/g,'')),found)}
+      mergeEvents(games,await fetchJson(BASE+'?dates='+days[i].replace(/-/g,'')),found,live)}
     return found;
   }
 

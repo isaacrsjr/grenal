@@ -27,16 +27,22 @@
 
   function lambdas(m,h,a){return [m.bh*m.att[h]*m.def[a], m.ba*m.att[a]*m.def[h]];}
 
-  function wdl(l1,l2){var p=[0,0,0],f1=[],f2=[],k;for(k=0;k<=10;k++){f1[k]=Math.exp(-l1)*Math.pow(l1,k)/fact(k);f2[k]=Math.exp(-l2)*Math.pow(l2,k)/fact(k);}
-    for(var x=0;x<=10;x++)for(var y=0;y<=10;y++){var q=f1[x]*f2[y];if(x>y)p[0]+=q;else if(x==y)p[1]+=q;else p[2]+=q;}var s=p[0]+p[1]+p[2];return [p[0]/s,p[1]/s,p[2]/s];}
+  function wdl(l1,l2,h0,a0){h0=h0||0;a0=a0||0;var p=[0,0,0],f1=[],f2=[],k;for(k=0;k<=10;k++){f1[k]=Math.exp(-l1)*Math.pow(l1,k)/fact(k);f2[k]=Math.exp(-l2)*Math.pow(l2,k)/fact(k);}
+    for(var x=0;x<=10;x++)for(var y=0;y<=10;y++){var q=f1[x]*f2[y],X=x+h0,Y=y+a0;if(X>Y)p[0]+=q;else if(X==Y)p[1]+=q;else p[2]+=q;}var s=p[0]+p[1]+p[2];return [p[0]/s,p[1]/s,p[2]/s];}
   function fact(n){var r=1;for(var i=2;i<=n;i++)r*=i;return r;}
 
   /* Sorteia um placar condicionado ao resultado pedido (0 mandante, 1 empate, 2 visitante) */
-  function poissonOutcome(l1,l2,want,r){for(var i=0;i<60;i++){var x=poisson(l1,r),y=poisson(l2,r);if((x>y?0:x===y?1:2)===want)return [x,y];}return want===0?[1,0]:want===1?[0,0]:[0,1];}
+  /* h0/a0: gols já marcados (jogo em andamento) */
+  function poissonOutcome(l1,l2,want,r,h0,a0){h0=h0||0;a0=a0||0;
+    for(var i=0;i<80;i++){var x=h0+poisson(l1,r),y=a0+poisson(l2,r);if((x>y?0:x===y?1:2)===want)return [x,y];}
+    var m=Math.max(h0,a0);return want===0?[Math.max(h0,a0+1),a0]:want===1?[m,m]:[h0,Math.max(a0,h0+1)];}
+  /* fração do jogo que falta, a partir do minuto (com ~3 min de acréscimos) */
+  function leftFrac(min){return Math.max(0.02,Math.min(1,(93-min)/93));}
 
   /* cutoffMs: games dated <= cutoff and done count as played
      opts.fixed: { "h-a": 0|1|2 } resultado imposto a jogos restantes (0 mandante, 1 empate, 2 visitante)
-     opts.track: ["h-a", ...] jogos cujo resultado é cruzado com o rebaixamento de opts.trackTeams */
+     opts.track: ["h-a", ...] jogos cujo resultado é cruzado com o rebaixamento de opts.trackTeams
+     opts.live: { "h-a": {hs, as, min} } jogos em andamento: parte do placar atual e simula só o tempo que falta */
   function run(games, teams, cutoffMs, nSims, seed, opts){
     opts=opts||{};
     var played=[],remaining=[],k;
@@ -47,7 +53,9 @@
     played.forEach(function(g){var H=base[g.h],A=base[g.a];H.j++;A.j++;H.gf+=g.hs;A.gf+=g.as;H.gd+=g.hs-g.as;A.gd+=g.as-g.hs;
       if(g.hs>g.as){H.p+=3;H.w++;}else if(g.hs<g.as){A.p+=3;A.w++;}else{H.p++;A.p++;}});
     var model=fit(played,teams,cutoffMs);
-    var lam=remaining.map(function(g){return lambdas(model,g.h,g.a);});
+    var live=opts.live||{};
+    var lv=remaining.map(function(g){var L=live[g.h+'-'+g.a];return L?{hs:L.hs,as:L.as,f:leftFrac(L.min)}:null;});
+    var lam=remaining.map(function(g,k){var l=lambdas(model,g.h,g.a);return lv[k]?[l[0]*lv[k].f,l[1]*lv[k].f]:l;});
     var rnd=mulberry32(seed||12345);
     var n=teams.length, rel={}, pts={}, posHist={};
     teams.forEach(function(t){rel[t]=0;pts[t]=0;posHist[t]=new Array(n).fill(0);});
@@ -60,7 +68,8 @@
     for(var s=0;s<nSims;s++){
       for(var i=0;i<n;i++){var b=base[teams[i]];P[i]=b.p;Wn[i]=b.w;GD[i]=b.gd;GF[i]=b.gf;TB[i]=rnd();}
       for(k=0;k<remaining.length;k++){var g=remaining[k],hi=idx[g.h],ai=idx[g.a],x,y;
-        if(fx[k]<0){x=poisson(lam[k][0],rnd);y=poisson(lam[k][1],rnd);}else{var sc=poissonOutcome(lam[k][0],lam[k][1],fx[k],rnd);x=sc[0];y=sc[1];}
+        var h0=lv[k]?lv[k].hs:0,a0=lv[k]?lv[k].as:0;
+        if(fx[k]<0){x=h0+poisson(lam[k][0],rnd);y=a0+poisson(lam[k][1],rnd);}else{var sc=poissonOutcome(lam[k][0],lam[k][1],fx[k],rnd,h0,a0);x=sc[0];y=sc[1];}
         oc[k]=x>y?0:x===y?1:2;
         GF[hi]+=x;GF[ai]+=y;GD[hi]+=x-y;GD[ai]+=y-x;if(x>y){P[hi]+=3;Wn[hi]++;}else if(x<y){P[ai]+=3;Wn[ai]++;}else{P[hi]++;P[ai]++;}}
       order.sort(function(a,b){return P[b]-P[a]||Wn[b]-Wn[a]||GD[b]-GD[a]||GF[b]-GF[a]||TB[b]-TB[a];});
@@ -71,7 +80,8 @@
     teams.forEach(function(t){out.probs[t]=rel[t]/nSims;out.expPts[t]=pts[t]/nSims;out.posHist[t]=posHist[t].map(function(c){return c/nSims;});out.table[t]=base[t];});
     /* cond["h-a"] = { n:[mandante,empate,visitante], rel:{ clube:[...] } } — simulações por resultado e quedas em cada uma */
     out.cond={};tk.forEach(function(c){var rl={};(opts.trackTeams||[]).forEach(function(t,z){rl[t]=c.rel[z];});out.cond[c.key]={n:c.n,rel:rl};});
-    out.remainingGames=remaining.map(function(g,k){var p=wdl(lam[k][0],lam[k][1]);return {h:g.h,a:g.a,date:g.date,pH:p[0],pD:p[1],pA:p[2]};});
+    out.remainingGames=remaining.map(function(g,k){var p=wdl(lam[k][0],lam[k][1],lv[k]?lv[k].hs:0,lv[k]?lv[k].as:0);var r={h:g.h,a:g.a,date:g.date,pH:p[0],pD:p[1],pA:p[2]};if(lv[k])r.live=live[g.h+'-'+g.a];return r;});
+    out.live=lv.filter(Boolean).length;
     return out;
   }
   root.RebaixModel={run:run,fit:fit,wdl:wdl};

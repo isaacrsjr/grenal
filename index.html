@@ -120,6 +120,24 @@ tr.hl td:nth-child(2){font-weight:600}
 tbody tr:hover td{background:var(--grid)}
 tbody tr.z4:hover td{filter:brightness(.97)}
 .fxrow .opp{display:flex;align-items:center;gap:6px;cursor:default;width:max-content;max-width:100%}
+/* Ao vivo */
+.live{display:flex;flex-direction:column;gap:8px;padding:12px 20px}
+.live[hidden]{display:none}
+.live .lh{font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--z4-ink);display:flex;align-items:center;gap:8px}
+.live .lsub{font-size:12px;color:var(--muted)}
+.lgs{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto minmax(0,1fr) 3.2em;gap:6px 8px;align-items:center;max-width:560px}
+.lg{display:contents}
+.lg .hn{text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lg .an{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ldot{width:9px;height:9px;border-radius:50%;background:var(--z4-ink);animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.ldot{animation:none}}
+.lg b{font-family:var(--display);font-size:18px;font-variant-numeric:tabular-nums;min-width:2.6em;text-align:center}
+.lg .m{font-size:12px;color:var(--z4-ink);font-weight:600}
+.lg.hl>*{font-weight:600}
+.lgs{font-size:14px}
+.livebadge{font-size:12px;font-weight:600;color:var(--z4-ink);display:inline-flex;align-items:center;gap:5px;margin-left:4px}
+.livebadge .ldot{width:7px;height:7px}
 /* Simulador */
 .simbar{position:sticky;top:0;z-index:3;background:var(--panel);display:flex;flex-wrap:wrap;gap:10px 28px;align-items:center;padding:10px 0 12px;margin-bottom:8px;border-bottom:1px solid var(--line)}
 .simclub{display:flex;align-items:center;gap:10px}
@@ -174,6 +192,8 @@ tbody tr.z4:hover td{filter:brightness(.97)}
     </div>
   </div>
 
+  <section class="card live" id="live" hidden></section>
+
   <section class="heroes" id="heroes">
     <article class="hero gre" id="hero-6273"></article>
     <article class="hero int" id="hero-1936"></article>
@@ -212,13 +232,13 @@ tbody tr.z4:hover td{filter:brightness(.97)}
 </div>
 
 <!-- O GitHub Pages deixa os arquivos em cache por 10 min: troque o ?v= sempre que mudar model.js ou core.js -->
-<script src="model.js?v=2026-10-24"></script>
-<script src="core.js?v=2026-10-24"></script>
+<script src="model.js?v=2026-10-24b"></script>
+<script src="core.js?v=2026-10-24b"></script>
 <script>
 (function(){
 var C=window.RebaixCore, GRE=C.GRE, INT=C.INT, FOCUS=[GRE,INT], SIMS=C.SIMS, SEED=C.SEED;
 var NAMES=C.NAMES, TEAMS=C.TEAMS, weekKey=C.weekKey;
-var state={games:null, updatedAt:null, snaps:[], cur:null};
+var state={games:null, updatedAt:null, snaps:[], cur:null, live:{}, liveAt:null}; // live: jogos em andamento, só na memória
 var $=function(id){return document.getElementById(id)};
 function nm(t){return NAMES[t]||(state.teams&&state.teams[t])||t}
 function pct(p){if(p==null)return '—';var v=p*100;if(v>0&&v<0.1)return '<0,1%';if(v<100&&v>99.9)return '>99,9%';return v.toFixed(1).replace('.',',')+'%'}
@@ -276,7 +296,8 @@ function renderAll(){
   var c=state.cur; if(!c) return;
   var played=c.played, last=null;
   Object.keys(state.games).forEach(function(k){var g=state.games[k];if(g[1]===1&&(!last||g[0]>last))last=g[0]});
-  $('meta').textContent=played+' de 380 jogos disputados · último resultado em '+(last?fmtDate(last,{day:'2-digit',month:'long'}):'—')+' · '+SIMS.toLocaleString('pt-BR')+' simulações';
+  $('meta').textContent=played+' de 380 jogos disputados · último resultado em '+(last?fmtDate(last,{day:'2-digit',month:'long'}):'—')+' · '+SIMS.toLocaleString('pt-BR')+' simulações'+(c.live?' · '+c.live+(c.live>1?' jogos':' jogo')+' ao vivo no cálculo':'');
+  renderLive();
   var rank=TEAMS.slice().sort(function(a,b){var A=c.table[a],B=c.table[b];return B.p-A.p||B.w-A.w||B.gd-A.gd||B.gf-A.gf});
   var snaps=state.snaps; state.rank=rank;
   var duo=$('duo'); if(!duo.firstChild){duo.appendChild(crest(GRE,40));duo.appendChild(crest(INT,40))}
@@ -376,7 +397,17 @@ function lsGet(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function countDone(g){var n=0;for(var k in g)if(g[k][1]===1)n++;return n}
 /* fixed: { "h-a": 0|1|2 }; também cruza cada jogo da dupla com o rebaixamento dos dois */
-function compute(cutoff,fixed){return window.RebaixModel.run(state.games,TEAMS,cutoff,SIMS,SEED,{fixed:fixed||{},track:TRACK,trackTeams:FOCUS})}
+function compute(cutoff,fixed){return window.RebaixModel.run(state.games,TEAMS,cutoff,SIMS,SEED,{fixed:fixed||{},track:TRACK,trackTeams:FOCUS,live:state.live})}
+
+/* ---------- jogos em andamento ---------- */
+function renderLive(){var box=$('live'),keys=Object.keys(state.live||{});box.textContent='';box.hidden=!keys.length;if(!keys.length)return;
+  var h=el('div','lh');h.appendChild(el('span','ldot'));h.appendChild(document.createTextNode('Ao vivo'));box.appendChild(h);
+  var list=el('div','lgs');box.appendChild(list);
+  keys.sort(function(a,b){var A=a.split('-'),B=b.split('-');return (FOCUS.indexOf(B[0])>=0||FOCUS.indexOf(B[1])>=0)-(FOCUS.indexOf(A[0])>=0||FOCUS.indexOf(A[1])>=0)}).forEach(function(k){
+    var L=state.live[k],t=k.split('-'),g=el('div','lg'+(FOCUS.indexOf(t[0])>=0||FOCUS.indexOf(t[1])>=0?' hl':''));
+    g.appendChild(el('span','hn',nm(t[0])));g.appendChild(crest(t[0],20));g.appendChild(el('b',null,L.hs+'×'+L.as));g.appendChild(crest(t[1],20));g.appendChild(el('span','an',nm(t[1])));g.appendChild(el('span','m',L.detail));list.appendChild(g)});
+  box.appendChild(el('div','lsub','Placar das '+new Date(state.liveAt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'. As chances abaixo já contam com ele e simulam só o tempo que falta. Clique em Atualizar resultados para pegar o placar mais recente.'));
+}
 
 /* ---------- simulador de resultados ---------- */
 var TRACK=[];FOCUS.forEach(function(f){TEAMS.forEach(function(o){if(o!==f){TRACK.push(f+'-'+o);if(FOCUS.indexOf(o)<0)TRACK.push(o+'-'+f)}})});
@@ -413,7 +444,9 @@ function renderSim(pending){
     if(!list.length){box.appendChild(el('div','empty','Sem jogos restantes.'));return}
     list.forEach(function(g){var key=g.h+'-'+g.a,home=g.h===t,opp=home?g.a:g.h,chosen=sim.sel[key];
       var row=el('div','fxrow');
-      var o=el('div','opp');o.appendChild(el('span','d',g.date?fmtDate(g.date):'a definir'));o.appendChild(document.createTextNode(home?'x':'@'));o.appendChild(crest(opp,20));o.appendChild(document.createTextNode(nm(opp)+(home?' (casa)':' (fora)')));row.appendChild(o);
+      var o=el('div','opp');o.appendChild(el('span','d',g.date?fmtDate(g.date):'a definir'));o.appendChild(document.createTextNode(home?'x':'@'));o.appendChild(crest(opp,20));o.appendChild(document.createTextNode(nm(opp)+(home?' (casa)':' (fora)')));
+      if(g.live){var lb=el('span','livebadge');lb.appendChild(el('span','ldot'));lb.appendChild(document.createTextNode('ao vivo '+g.live.hs+'×'+g.live.as+' · '+g.live.detail));o.appendChild(lb)}
+      row.appendChild(o);
       bindTip(o,function(){var oc=c.table[opp],op=state.rank.indexOf(opp)+1;
         return tipCard(null,nm(g.h)+' x '+nm(g.a),g.date?fmtDate(g.date,{weekday:'long',day:'2-digit',month:'long',hour:'2-digit',minute:'2-digit'}):'data a definir',[
           [nm(opp)+' · '+ord(op),oc.p+' pts',null,opp],['Chance de queda dele',pct(c.probs[opp])]])},false);
@@ -457,15 +490,16 @@ async function refresh(){
   try{
     var fetchJson=function(u){return withTimeout(fetch(u,{cache:'no-store'}).then(function(r){if(!r.ok)throw {code:'http',message:'a ESPN respondeu '+r.status};return r.json()}),30000,'ESPN')};
     setStatus('Buscando resultados na ESPN…');
-    var games=JSON.parse(JSON.stringify(state.games));
-    var found=await RebaixCore.fetchUpdates(games,fetchJson,Date.now(),function(d,i,n){setStatus('Lendo jogos de '+fmtDate(d+'T15:00:00Z')+' ('+(i+1)+'/'+n+')…')});
-    state.games=games;
+    var games=JSON.parse(JSON.stringify(state.games)),live={};
+    var found=await RebaixCore.fetchUpdates(games,fetchJson,Date.now(),function(d,i,n){setStatus('Lendo jogos de '+fmtDate(d+'T15:00:00Z')+' ('+(i+1)+'/'+n+')…')},live);
+    state.games=games;state.live=live;state.liveAt=Date.now();
     setStatus('Simulando '+SIMS.toLocaleString('pt-BR')+' temporadas…');await tick();
     var res=await RebaixCore.updateSnapshots(games,state.snaps,Date.now(),window.RebaixModel,'navegador',tick);
-    state.snaps=res.snaps;state.cur=res.cur;state.updatedAt=new Date().toISOString();state.source='este navegador';
+    // o histórico fica só com resultados finais; a tela usa também o placar dos jogos em andamento
+    state.snaps=res.snaps;state.cur=Object.keys(live).length?compute(Date.now()):res.cur;state.updatedAt=new Date().toISOString();state.source='este navegador';
     lsSet(LS_G,{games:games,updatedAt:state.updatedAt});lsSet(LS_S,res.snaps);
     renderAll();
-    setStatus((found.length?found.length+' resultado(s) novo(s): '+found.slice(0,4).join(', ')+(found.length>4?'…':'')+'.':'Nenhum resultado novo. Probabilidades recalculadas.')+' Salvo neste navegador.','ok');
+    setStatus((found.length?found.length+' resultado(s) novo(s): '+found.slice(0,4).join(', ')+(found.length>4?'…':'')+'.':'Nenhum resultado novo. Probabilidades recalculadas.')+(state.cur.live?' '+state.cur.live+(state.cur.live>1?' jogos em andamento entraram':' jogo em andamento entrou')+' no cálculo com o placar atual.':'')+' Salvo neste navegador.','ok');
   }catch(e){
     var c=e&&e.code;
     var msg=c==='timeout'?'A ESPN não respondeu em 30 s. Tente de novo em alguns minutos.':
