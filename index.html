@@ -86,12 +86,8 @@ tr.hl td:nth-child(2){font-weight:600}
 .bar .v{text-align:right;font-variant-numeric:tabular-nums}
 .bar .n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fx{display:flex;flex-direction:column;gap:10px}
-.fxrow{display:grid;grid-template-columns:62px 1fr;gap:4px 12px;align-items:center;font-size:14px}
-.fxrow .d{color:var(--muted);font-size:13px;grid-row:span 2}
-.wdl{display:flex;height:10px;border-radius:3px;overflow:hidden;background:var(--grid)}
-.wdl span{height:100%}
-.wdl .w{background:var(--ok)} .wdl .e{background:var(--muted);opacity:.45} .wdl .l{background:var(--z4-ink)}
-.fxp{font-size:12px;color:var(--muted)}
+.fxrow{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.fxrow .d{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums;min-width:3.2em}
 .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
 .cols h3{font-size:18px;text-transform:uppercase;margin-bottom:8px}
 .empty{color:var(--muted);padding:24px 0;text-align:center}
@@ -123,9 +119,36 @@ tr.hl td:nth-child(2){font-weight:600}
 .bar .n span{overflow:hidden;text-overflow:ellipsis}
 tbody tr:hover td{background:var(--grid)}
 tbody tr.z4:hover td{filter:brightness(.97)}
-.fxrow{border-radius:6px;padding:4px;margin:-4px;cursor:default}
-.fxrow:hover,.fxrow:focus-visible{background:var(--grid);outline:none}
-.fxrow .opp{display:flex;align-items:center;gap:6px}
+.fxrow .opp{display:flex;align-items:center;gap:6px;cursor:default;width:max-content;max-width:100%}
+/* Simulador */
+.simbar{position:sticky;top:0;z-index:3;background:var(--panel);display:flex;flex-wrap:wrap;gap:10px 28px;align-items:center;padding:10px 0 12px;margin-bottom:8px;border-bottom:1px solid var(--line)}
+.simclub{display:flex;align-items:center;gap:10px}
+.simclub .sn{font-family:var(--display);font-weight:700;text-transform:uppercase;font-size:15px;letter-spacing:.03em;line-height:1}
+.simclub.gre .sn{color:var(--gre)} .simclub.int .sn{color:var(--int)}
+.simclub .sv{font-family:var(--display);font-weight:700;font-size:32px;line-height:1}
+.simclub .sd{font-size:12px;color:var(--muted)}
+.sd.up,.pk-v.up{color:var(--z4-ink)} .sd.down,.pk-v.down{color:var(--ok)}
+.simact{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-size:13px;color:var(--muted)}
+.btn2{font-family:var(--display);font-weight:600;font-size:14px;letter-spacing:.05em;text-transform:uppercase;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:4px 12px;cursor:pointer}
+.btn2:hover:not([disabled]){border-color:var(--muted)}
+.btn2[disabled]{opacity:.4;cursor:default}
+.simst{min-height:1.2em}
+.simhelp{font-size:13px;color:var(--muted);margin:0 0 16px;max-width:75ch}
+.pick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.pk{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:5px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:stretch;gap:1px;text-align:left;min-width:0}
+.pk:hover{border-color:var(--muted)}
+.pk:focus-visible{outline:2px solid var(--gre);outline-offset:1px}
+.pk-l{display:flex;justify-content:space-between;gap:4px;font-size:12px;color:var(--muted);white-space:nowrap}
+.pk-v{font-family:var(--display);font-weight:700;font-size:19px;line-height:1.1}
+.pk.on{box-shadow:inset 0 0 0 1px currentColor}
+.pk.w.on{border-color:var(--ok);color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,var(--panel))}
+.pk.e.on{border-color:var(--muted);color:var(--muted);background:var(--grid)}
+.pk.l.on{border-color:var(--z4-ink);color:var(--z4-ink);background:color-mix(in srgb,var(--z4-ink) 12%,var(--panel))}
+.pk.on .pk-l{color:inherit;font-weight:600}
+.pk.on .pk-v{color:var(--ink)}
+.pk.off{opacity:.5}
+#fixtures .pk-v,#fixtures .sv{transition:opacity .15s}
+#fixtures.pending .pk-v,#fixtures.pending .sv{opacity:.35}
 .tip{position:fixed;z-index:50;min-width:180px;max-width:min(300px,calc(100vw - 16px));white-space:normal;line-height:1.35}
 .tip-h{display:flex;align-items:center;gap:8px;margin-bottom:2px}
 .tip-sub{color:var(--muted);font-size:12px;margin-bottom:6px}
@@ -133,7 +156,7 @@ tbody tr.z4:hover td{filter:brightness(.97)}
 .tip-r .k{display:flex;align-items:center;gap:6px}
 .tip-r .v{font-variant-numeric:tabular-nums;font-weight:600}
 .tip-sep{border-top:1px solid var(--line);margin:5px 0}
-@media (max-width:520px){.hero{grid-template-columns:1fr}.hero .facts{grid-column:1;grid-row:auto;flex-direction:row;flex-wrap:wrap;justify-content:flex-start;text-align:left;gap:14px 20px;margin-top:8px}.refresh{align-items:flex-start}.status{text-align:left}.bar{grid-template-columns:90px 1fr 50px}}
+@media (max-width:520px){.hero{grid-template-columns:1fr}.hero .facts{grid-column:1;grid-row:auto;flex-direction:row;flex-wrap:wrap;justify-content:flex-start;text-align:left;gap:14px 20px;margin-top:8px}.refresh{align-items:flex-start}.status{text-align:left}.bar{grid-template-columns:90px 1fr 50px}.simbar{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;padding:8px 0}.simclub{gap:6px}.simclub .crest{width:24px;height:24px}.simclub .sn{font-size:13px}.simclub .sv{font-size:24px}.sd .hoje{display:none}.simact{grid-column:1/-1;justify-content:space-between}.simact{margin-left:0;flex-direction:row;align-items:center;gap:10px;width:100%}.pk{padding:5px 6px}.pk-v{font-size:17px}}
 </style>
 
 </head>
@@ -176,7 +199,9 @@ tbody tr.z4:hover td{filter:brightness(.97)}
   </div>
 
   <section class="card" id="fixtures">
-    <header><h2>Jogos que faltam</h2><span class="eyebrow">chance de vitória · empate · derrota</span></header>
+    <header><h2>Simulador · jogos que faltam</h2><span class="eyebrow">escolha os resultados</span></header>
+    <div class="simbar" id="simbar"></div>
+    <p class="simhelp">Toque num resultado para fixá-lo; toque de novo para soltar. Em cada botão, o número grande é a chance de queda do clube se aquele resultado acontecer (levando em conta os outros já escolhidos) e o pequeno é a chance do próprio resultado. Como tudo vem de simulações, os valores podem oscilar cerca de 1 ponto entre um cálculo e outro.</p>
     <div class="cols"><div><h3 style="color:var(--gre)">Grêmio</h3><div class="fx" id="fx-6273"></div></div><div><h3 style="color:var(--int)">Internacional</h3><div class="fx" id="fx-1936"></div></div></div>
   </section>
 
@@ -293,19 +318,7 @@ function renderAll(){
     tr.appendChild(el('td','num',String(i+1)));var td=el('td');var sp=el('span','tname');sp.appendChild(crest(t,20));sp.appendChild(document.createTextNode(nm(t)));td.appendChild(sp);tr.appendChild(td);
     [r.j,r.p,r.w,(r.gd>0?'+':'')+r.gd,c.expPts[t].toFixed(1).replace('.',','),pct(c.probs[t])].forEach(function(v){tr.appendChild(el('td','num',String(v)))});
     bindTip(tr,function(){return teamTip(t)},false);tb.appendChild(tr)});
-  // fixtures
-  FOCUS.forEach(function(t){var box=$('fx-'+t);box.textContent='';
-    var list=c.remainingGames.filter(function(g){return g.h===t||g.a===t}).sort(function(a,b){return (a.date||'9')<(b.date||'9')?-1:1});
-    if(!list.length){box.appendChild(el('div','empty','Sem jogos restantes.'));return}
-    list.forEach(function(g){var home=g.h===t;var opp=home?g.a:g.h;var w=home?g.pH:g.pA,l=home?g.pA:g.pH,e=g.pD;
-      var row=el('div','fxrow');row.appendChild(el('div','d num',g.date?fmtDate(g.date):'a definir'));
-      var o=el('div','opp');o.appendChild(document.createTextNode(home?'x':'@'));o.appendChild(crest(opp,20));o.appendChild(document.createTextNode(nm(opp)+(home?' (casa)':' (fora)')));row.appendChild(o);
-      bindTip(row,function(){var oc=c.table[opp],op=state.rank.indexOf(opp)+1;
-        return tipCard(null,nm(g.h)+' x '+nm(g.a),g.date?fmtDate(g.date,{weekday:'long',day:'2-digit',month:'long',hour:'2-digit',minute:'2-digit'}):'data a definir',[
-          ['Vitória',pct(w),'var(--ok)',t],['Empate',pct(e)],['Derrota',pct(l),'var(--z4-ink)'],'sep',
-          [nm(opp)+' · '+ord(op),oc.p+' pts',null,opp],['Chance de queda dele',pct(c.probs[opp])]])});
-      var bar=el('div','wdl');[['w',w],['e',e],['l',l]].forEach(function(p){var s=el('span',p[0]);s.style.width=(p[1]*100)+'%';bar.appendChild(s)});
-      var wrap=el('div');wrap.appendChild(bar);wrap.appendChild(el('div','fxp num',Math.round(w*100)+'% · '+Math.round(e*100)+'% · '+Math.round(l*100)+'%'));row.appendChild(wrap);box.appendChild(row)})});
+  simCompute();renderSim();
   drawChart();
 }
 
@@ -361,7 +374,64 @@ var LS_G='gn_games_v1', LS_S='gn_snaps_v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function countDone(g){var n=0;for(var k in g)if(g[k][1]===1)n++;return n}
-function compute(cutoff){return window.RebaixModel.run(state.games,TEAMS,cutoff,SIMS,SEED)}
+/* fixed: { "h-a": 0|1|2 }; também cruza cada jogo da dupla com o rebaixamento dos dois */
+function compute(cutoff,fixed){return window.RebaixModel.run(state.games,TEAMS,cutoff,SIMS,SEED,{fixed:fixed||{},track:TRACK,trackTeams:FOCUS})}
+
+/* ---------- simulador de resultados ---------- */
+var TRACK=[];FOCUS.forEach(function(f){TEAMS.forEach(function(o){if(o!==f){TRACK.push(f+'-'+o);if(FOCUS.indexOf(o)<0)TRACK.push(o+'-'+f)}})});
+var LS_SIM='gn_sim_v1', sim={sel:lsGet(LS_SIM)||{}, res:null, timer:null};
+function simCompute(){
+  if(!state.cur.cond)state.cur=compute(Date.now());
+  Object.keys(sim.sel).forEach(function(k){if(!state.cur.cond[k])delete sim.sel[k]}); // jogo já disputado
+  sim.res=Object.keys(sim.sel).length?compute(Date.now(),sim.sel):state.cur;
+}
+function simSchedule(){lsSet(LS_SIM,sim.sel);renderSim(true);clearTimeout(sim.timer);
+  sim.timer=setTimeout(function(){simCompute();renderSim()},60)}
+function pick(key,code){if(sim.sel[key]===code)delete sim.sel[key];else sim.sel[key]=code;simSchedule()}
+function condQ(res,key,code,t){var cs=res.cond&&res.cond[key];return cs&&cs.n[code]>0?cs.rel[t][code]/cs.n[code]:null}
+function renderSim(pending){
+  var c=state.cur,r=sim.res||c,nSel=Object.keys(sim.sel).length,box=$('fixtures');
+  box.classList.toggle('pending',!!pending);
+  hideTip();
+  var keep=document.activeElement&&document.activeElement.dataset?document.activeElement.dataset.pk:null;
+  // resumo fixo no topo
+  var bar=$('simbar');bar.textContent='';
+  FOCUS.forEach(function(t){var d=(r.probs[t]-c.probs[t])*100,b=el('div','simclub'+(t===GRE?' gre':' int'));b.appendChild(crest(t,34));
+    var tx=el('div');tx.appendChild(el('div','sn',nm(t)));tx.appendChild(el('div','sv num',pct(r.probs[t])));
+    var dd=el('div','sd num');
+    if(!nSel)dd.textContent='chance de queda hoje';
+    else if(Math.abs(d)<0.05)dd.textContent='igual à de hoje';
+    else{dd.textContent=(d>0?'▲ ':'▼ ')+pp(Math.abs(d))+' p.p.';dd.appendChild(el('span','hoje',' (hoje '+pct(c.probs[t])+')'));dd.classList.add(d>0?'up':'down')}
+    tx.appendChild(dd);b.appendChild(tx);bar.appendChild(b)});
+  var act=el('div','simact');act.appendChild(el('div','num',nSel?nSel+(nSel>1?' resultados escolhidos':' resultado escolhido'):'nenhum resultado escolhido'));
+  var clr=el('button','btn2','Limpar');clr.type='button';clr.disabled=!nSel;clr.addEventListener('click',function(){sim.sel={};simSchedule()});act.appendChild(clr);
+  act.appendChild(el('div','simst',pending?'Recalculando…':''));bar.appendChild(act);
+  // jogos
+  FOCUS.forEach(function(t){var box=$('fx-'+t);box.textContent='';
+    var list=c.remainingGames.filter(function(g){return g.h===t||g.a===t}).sort(function(a,b){return (a.date||'9')<(b.date||'9')?-1:1});
+    if(!list.length){box.appendChild(el('div','empty','Sem jogos restantes.'));return}
+    list.forEach(function(g){var key=g.h+'-'+g.a,home=g.h===t,opp=home?g.a:g.h,chosen=sim.sel[key];
+      var row=el('div','fxrow');
+      var o=el('div','opp');o.appendChild(el('span','d',g.date?fmtDate(g.date):'a definir'));o.appendChild(document.createTextNode(home?'x':'@'));o.appendChild(crest(opp,20));o.appendChild(document.createTextNode(nm(opp)+(home?' (casa)':' (fora)')));row.appendChild(o);
+      bindTip(o,function(){var oc=c.table[opp],op=state.rank.indexOf(opp)+1;
+        return tipCard(null,nm(g.h)+' x '+nm(g.a),g.date?fmtDate(g.date,{weekday:'long',day:'2-digit',month:'long',hour:'2-digit',minute:'2-digit'}):'data a definir',[
+          [nm(opp)+' · '+ord(op),oc.p+' pts',null,opp],['Chance de queda dele',pct(c.probs[opp])]])},false);
+      var pk=el('div','pick');
+      [['w','Vitória',home?0:2],['e','Empate',1],['l','Derrota',home?2:0]].forEach(function(x){
+        var code=x[2],pg=[g.pH,g.pD,g.pA][code],on=chosen===code,off=chosen!=null&&!on,q=condQ(r,key,code,t);
+        var b=el('button','pk '+x[0]+(on?' on':'')+(off?' off':''));b.type='button';b.dataset.pk=key+':'+code;b.setAttribute('aria-pressed',on?'true':'false');
+        var top=el('span','pk-l');top.appendChild(el('span',null,(on?'✓ ':'')+x[1]));top.appendChild(el('span','num',Math.round(pg*100)+'%'));b.appendChild(top);
+        var v=el('span','pk-v num',q==null?'—':pct(q));if(q!=null&&!on){var dq=q-r.probs[t];if(dq<-0.005)v.classList.add('down');else if(dq>0.005)v.classList.add('up')}b.appendChild(v);
+        b.setAttribute('aria-label',x[1]+' contra '+nm(opp)+': '+(q==null?'':'chance de queda '+pct(q)+', ')+'chance do resultado '+pct(pg)+(on?', escolhido':''));
+        b.addEventListener('click',function(){pick(key,code)});
+        bindTip(b,function(){var res=sim.res||c,rows=[['Chance desse resultado',pct(pg)],'sep'];
+          FOCUS.forEach(function(f){var qf=condQ(res,key,code,f);rows.push(['Queda do '+nm(f),qf==null?'—':pct(qf),null,f])});
+          var title=x[0]==='e'?'Empate com '+nm(opp):(x[0]==='w'?'Vitória':'Derrota')+' do '+nm(t);
+          return tipCard(null,title,off?'outro resultado está escolhido: toque para trocar':nm(g.h)+' x '+nm(g.a)+(g.date?' · '+fmtDate(g.date):''),rows)},false);
+        pk.appendChild(b)});
+      row.appendChild(pk);box.appendChild(row)})});
+  if(keep){var f=box.querySelector('[data-pk="'+keep+'"]');if(f)f.focus()}
+}
 function sortSnaps(a){return a.sort(function(x,y){return x.week<y.week?-1:1})}
 async function getJSON(u){var r=await fetch(u+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw {code:'http',message:u+' respondeu '+r.status};return r.json()}
 function updatedLine(){return state.updatedAt?'Dados de '+fmtDate(state.updatedAt,{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' · fonte: '+state.source:''}

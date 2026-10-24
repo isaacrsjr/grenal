@@ -31,8 +31,14 @@
     for(var x=0;x<=10;x++)for(var y=0;y<=10;y++){var q=f1[x]*f2[y];if(x>y)p[0]+=q;else if(x==y)p[1]+=q;else p[2]+=q;}var s=p[0]+p[1]+p[2];return [p[0]/s,p[1]/s,p[2]/s];}
   function fact(n){var r=1;for(var i=2;i<=n;i++)r*=i;return r;}
 
-  /* cutoffMs: games dated <= cutoff and done count as played */
-  function run(games, teams, cutoffMs, nSims, seed){
+  /* Sorteia um placar condicionado ao resultado pedido (0 mandante, 1 empate, 2 visitante) */
+  function poissonOutcome(l1,l2,want,r){for(var i=0;i<60;i++){var x=poisson(l1,r),y=poisson(l2,r);if((x>y?0:x===y?1:2)===want)return [x,y];}return want===0?[1,0]:want===1?[0,0]:[0,1];}
+
+  /* cutoffMs: games dated <= cutoff and done count as played
+     opts.fixed: { "h-a": 0|1|2 } resultado imposto a jogos restantes (0 mandante, 1 empate, 2 visitante)
+     opts.track: ["h-a", ...] jogos cujo resultado é cruzado com o rebaixamento de opts.trackTeams */
+  function run(games, teams, cutoffMs, nSims, seed, opts){
+    opts=opts||{};
     var played=[],remaining=[],k;
     var base={};teams.forEach(function(t){base[t]={p:0,w:0,gd:0,gf:0,j:0};});
     teams.forEach(function(h){teams.forEach(function(a){if(h===a)return;var g=games[h+'-'+a];
@@ -47,15 +53,24 @@
     teams.forEach(function(t){rel[t]=0;pts[t]=0;posHist[t]=new Array(n).fill(0);});
     var idx={};teams.forEach(function(t,i){idx[t]=i;});
     var P=new Float64Array(n),Wn=new Float64Array(n),GD=new Float64Array(n),GF=new Float64Array(n),TB=new Float64Array(n),order=teams.map(function(_,i){return i;});
+    var fixed=opts.fixed||{}, fx=remaining.map(function(g){var v=fixed[g.h+'-'+g.a];return v===0||v===1||v===2?v:-1;});
+    var tkTeams=(opts.trackTeams||[]).map(function(t){return idx[t];});
+    var tk=[];(opts.track||[]).forEach(function(key){for(var j=0;j<remaining.length;j++)if(remaining[j].h+'-'+remaining[j].a===key)tk.push({key:key,k:j,n:[0,0,0],rel:tkTeams.map(function(){return [0,0,0];})});});
+    var oc=new Int8Array(remaining.length),relNow=new Uint8Array(n);
     for(var s=0;s<nSims;s++){
       for(var i=0;i<n;i++){var b=base[teams[i]];P[i]=b.p;Wn[i]=b.w;GD[i]=b.gd;GF[i]=b.gf;TB[i]=rnd();}
-      for(k=0;k<remaining.length;k++){var g=remaining[k],hi=idx[g.h],ai=idx[g.a];var x=poisson(lam[k][0],rnd),y=poisson(lam[k][1],rnd);
+      for(k=0;k<remaining.length;k++){var g=remaining[k],hi=idx[g.h],ai=idx[g.a],x,y;
+        if(fx[k]<0){x=poisson(lam[k][0],rnd);y=poisson(lam[k][1],rnd);}else{var sc=poissonOutcome(lam[k][0],lam[k][1],fx[k],rnd);x=sc[0];y=sc[1];}
+        oc[k]=x>y?0:x===y?1:2;
         GF[hi]+=x;GF[ai]+=y;GD[hi]+=x-y;GD[ai]+=y-x;if(x>y){P[hi]+=3;Wn[hi]++;}else if(x<y){P[ai]+=3;Wn[ai]++;}else{P[hi]++;P[ai]++;}}
       order.sort(function(a,b){return P[b]-P[a]||Wn[b]-Wn[a]||GD[b]-GD[a]||GF[b]-GF[a]||TB[b]-TB[a];});
-      for(var r=0;r<n;r++){var t=teams[order[r]];posHist[t][r]++;if(r>=n-4)rel[t]++;pts[t]+=P[order[r]];}
+      for(var r=0;r<n;r++){var t=teams[order[r]];posHist[t][r]++;relNow[order[r]]=r>=n-4?1:0;if(r>=n-4)rel[t]++;pts[t]+=P[order[r]];}
+      for(var q=0;q<tk.length;q++){var o=oc[tk[q].k];tk[q].n[o]++;for(var z=0;z<tkTeams.length;z++)tk[q].rel[z][o]+=relNow[tkTeams[z]];}
     }
     var out={probs:{},expPts:{},posHist:{},table:{},played:played.length,remaining:remaining.length,model:model};
     teams.forEach(function(t){out.probs[t]=rel[t]/nSims;out.expPts[t]=pts[t]/nSims;out.posHist[t]=posHist[t].map(function(c){return c/nSims;});out.table[t]=base[t];});
+    /* cond["h-a"] = { n:[mandante,empate,visitante], rel:{ clube:[...] } } — simulações por resultado e quedas em cada uma */
+    out.cond={};tk.forEach(function(c){var rl={};(opts.trackTeams||[]).forEach(function(t,z){rl[t]=c.rel[z];});out.cond[c.key]={n:c.n,rel:rl};});
     out.remainingGames=remaining.map(function(g,k){var p=wdl(lam[k][0],lam[k][1]);return {h:g.h,a:g.a,date:g.date,pH:p[0],pD:p[1],pA:p[2]};});
     return out;
   }
