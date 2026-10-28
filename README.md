@@ -12,6 +12,8 @@ Painel com a chance de Grêmio e Internacional caírem para a Série B no Brasil
 
 Passe o mouse sobre gráficos e tabelas para ver os detalhes. Os escudos vêm da ESPN (`a.espncdn.com`).
 
+O rodapé mostra o total de visitas, contado pelo [GoatCounter](https://www.goatcounter.com) (sem cookies; painel em `isaacrsjr.goatcounter.com`). O código do site fica na constante `GOATCOUNTER` do `index.html`; deixá-la vazia desliga o contador.
+
 ## Como é calculado
 
 1. **Força dos clubes:** cada time recebe uma força de ataque e uma de defesa, estimadas por um modelo de Poisson a partir dos jogos já disputados, com mando de campo. Jogos recentes pesam mais (meia-vida de 180 dias), e todo clube começa com o equivalente a 10 jogos "médios", para o modelo não exagerar no início do campeonato.
