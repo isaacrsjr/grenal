@@ -99,9 +99,9 @@ td:first-child{white-space:nowrap}
 .empty{color:var(--muted);padding:24px 0;text-align:center}
 .note{font-size:13px;color:var(--muted);max-width:75ch}
 .note p{margin:.4em 0}
-.foot{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;display:flex;align-items:center;gap:8px}
-.foot[hidden]{display:none}
-.foot b{font-family:var(--display);font-size:16px;color:var(--ink);font-variant-numeric:tabular-nums}
+.visits{font-size:13px;color:var(--muted);display:flex;align-items:baseline;gap:5px}
+.visits[hidden]{display:none}
+.visits b{font-family:var(--display);font-size:16px;color:var(--ink);font-variant-numeric:tabular-nums}
 /* Escudos e tooltips */
 .crest{object-fit:contain;flex:none;display:inline-block;vertical-align:middle}
 .brand{display:flex;align-items:center;gap:14px}
@@ -198,6 +198,7 @@ tbody tr.z4:hover td{filter:brightness(.97)}
     <div class="refresh">
       <button class="btn" id="refreshBtn" type="button"><span class="spin"></span><span id="btnLabel">Atualizar resultados</span></button>
       <div class="status" id="status" aria-live="polite"></div>
+      <div class="visits" id="visits" hidden></div>
     </div>
   </div>
 
@@ -239,7 +240,6 @@ tbody tr.z4:hover td{filter:brightness(.97)}
     <p><b>Atualização.</b> Todo dia, de madrugada, o GitHub busca os resultados novos no placar público da ESPN, recalcula e grava o ponto da semana no gráfico (cada semana, de segunda a domingo, guarda o último cálculo feito nela). O botão Atualizar resultados faz a mesma busca na hora, direto do seu navegador; esse resultado fica salvo só neste navegador até a próxima atualização automática.</p>
   </section>
 
-  <footer class="foot" id="visits" hidden></footer>
 </div>
 
 <!-- O GitHub Pages deixa os arquivos em cache por 10 min: troque o ?v= sempre que mudar model.js ou core.js -->

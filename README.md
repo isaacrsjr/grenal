@@ -12,7 +12,7 @@ Painel com a chance de Grêmio e Internacional caírem para a Série B no Brasil
 
 Passe o mouse sobre gráficos e tabelas para ver os detalhes. Os escudos vêm da ESPN (`a.espncdn.com`).
 
-O rodapé mostra o total de visitas, contado pelo [GoatCounter](https://www.goatcounter.com) (sem cookies; painel em `isaacrsjr.goatcounter.com`). O código do site fica na constante `GOATCOUNTER` do `index.html`; deixá-la vazia desliga o contador.
+O topo da página, abaixo do status da atualização, mostra o total de visitas, contado pelo [GoatCounter](https://www.goatcounter.com) (sem cookies; painel em `isaacrsjr.goatcounter.com`). O código do site fica na constante `GOATCOUNTER` do `index.html`; deixá-la vazia desliga o contador.
 
 ## Como é calculado
 
