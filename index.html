@@ -176,6 +176,33 @@ tbody tr.z4:hover td{filter:brightness(.97)}
 .pk.off{opacity:.5}
 #fixtures .pk-v,#fixtures .sv{transition:opacity .15s}
 #fixtures.pending .pk-v,#fixtures.pending .sv{opacity:.35}
+/* Como a conta é feita */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px;overflow-x:auto;scrollbar-width:none}
+.tab{font-family:var(--display);font-weight:600;font-size:16px;letter-spacing:.04em;text-transform:uppercase;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);padding:6px 10px 8px;margin-bottom:-1px;cursor:pointer;white-space:nowrap}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab:focus-visible{outline:2px solid var(--gre);outline-offset:-2px}
+.howfor{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:16px}
+.howfor[hidden]{display:none}
+.seg{font:inherit;font-size:14px;font-weight:600;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:3px 12px 3px 4px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.seg[aria-pressed="true"]{color:var(--c);border-color:var(--c);background:var(--soft)}
+.seg.gre{--c:var(--gre);--soft:var(--gre-soft)} .seg.int{--c:var(--int);--soft:var(--int-soft)}
+.seg:focus-visible{outline:2px solid var(--gre);outline-offset:1px}
+.steps{list-style:none;counter-reset:st;margin:0;padding:0;display:flex;flex-direction:column;gap:22px;max-width:78ch}
+.steps>li{counter-increment:st;position:relative;padding-left:42px}
+.steps>li::before{content:counter(st);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--bg);font-family:var(--display);font-weight:700;font-size:16px;display:grid;place-items:center}
+.steps h3{font-size:18px;text-transform:uppercase;margin:3px 0 6px}
+.steps p{margin:.4em 0}
+.calc{background:var(--grid);border-radius:6px;padding:10px 14px;margin:10px 0;display:flex;flex-direction:column;gap:6px;font-variant-numeric:tabular-nums}
+.calc b{white-space:nowrap}
+.calc .why{font-size:13px;color:var(--muted)}
+table.mini{width:auto;min-width:min(100%,380px);font-size:13px;margin:10px 0}
+.mini th,.mini td,.mini th:nth-child(2),.mini td:nth-child(2){text-align:right;padding:4px 10px}
+.mini th{white-space:nowrap}
+.mini th:first-child,.mini td:first-child{text-align:left;color:var(--ink);width:auto}
+.mini td.z{color:var(--z4-ink);font-weight:600}
+.mini tbody tr:hover td{background:none}
+#how a,.simhelp a{color:var(--accent);font-weight:600}
 .tip{position:fixed;z-index:50;min-width:180px;max-width:min(300px,calc(100vw - 16px));white-space:normal;line-height:1.35}
 .tip-h{display:flex;align-items:center;gap:8px;margin-bottom:2px}
 .tip-sub{color:var(--muted);font-size:12px;margin-bottom:6px}
@@ -183,7 +210,7 @@ tbody tr.z4:hover td{filter:brightness(.97)}
 .tip-r .k{display:flex;align-items:center;gap:6px}
 .tip-r .v{font-variant-numeric:tabular-nums;font-weight:600}
 .tip-sep{border-top:1px solid var(--line);margin:5px 0}
-@media (max-width:520px){.hero{grid-template-columns:1fr}.hero .facts{grid-column:1;grid-row:auto;flex-direction:row;flex-wrap:wrap;justify-content:flex-start;text-align:left;gap:14px 20px;margin-top:8px}.refresh{align-items:flex-start}.status{text-align:left}.bar{grid-template-columns:90px 1fr 50px}.simbar{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;padding:8px 0}.simclub{gap:6px}.simclub .crest{width:24px;height:24px}.simclub .sn{font-size:13px}.simclub .sv{font-size:24px}.sd .hoje{display:none}.simact{grid-column:1/-1;justify-content:space-between}.simact{margin-left:0;flex-direction:row;align-items:center;gap:10px;width:100%}.pk{padding:5px 6px}.pk-v{font-size:17px}}
+@media (max-width:520px){.hero{grid-template-columns:1fr}.hero .facts{grid-column:1;grid-row:auto;flex-direction:row;flex-wrap:wrap;justify-content:flex-start;text-align:left;gap:14px 20px;margin-top:8px}.refresh{align-items:flex-start}.status{text-align:left}.bar{grid-template-columns:90px 1fr 50px}.simbar{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;padding:8px 0}.simclub{gap:6px}.simclub .crest{width:24px;height:24px}.simclub .sn{font-size:13px}.simclub .sv{font-size:24px}.sd .hoje{display:none}.simact{grid-column:1/-1;justify-content:space-between}.simact{margin-left:0;flex-direction:row;align-items:center;gap:10px;width:100%}.pk{padding:5px 6px}.pk-v{font-size:17px}.steps>li{padding-left:0}.steps>li::before{position:static;float:left;width:24px;height:24px;font-size:14px;margin:0 8px 0 0}.mini th,.mini td,.mini th:nth-child(2),.mini td:nth-child(2){padding:4px 6px}.tab{font-size:15px;padding:6px 6px 8px}.calc{padding:8px 10px}}
 </style>
 
 </head>
@@ -231,20 +258,34 @@ tbody tr.z4:hover td{filter:brightness(.97)}
   <section class="card" id="fixtures">
     <header><h2>Simulador · jogos que faltam</h2><span class="eyebrow">escolha os resultados</span></header>
     <div class="simbar" id="simbar"></div>
-    <p class="simhelp">Toque num resultado para fixá-lo; toque de novo para soltar. Em cada botão, o número grande é a chance de queda do clube se aquele resultado acontecer (levando em conta os outros já escolhidos) e o pequeno é a chance do próprio resultado. Como tudo vem de simulações, os valores podem oscilar cerca de 1 ponto entre um cálculo e outro.</p>
+    <p class="simhelp">Toque num resultado para fixá-lo; toque de novo para soltar. Em cada botão, o número grande é a chance de queda do clube se aquele resultado acontecer (levando em conta os outros já escolhidos) e o pequeno é a chance do próprio resultado. Como tudo vem de simulações, os valores podem oscilar cerca de 1 ponto entre um cálculo e outro. <a href="#how" id="howLink">Entenda a conta</a>.</p>
     <div class="cols"><div><h3 style="color:var(--gre)">Grêmio</h3><div class="fx" id="fx-6273"></div></div><div><h3 style="color:var(--int)">Internacional</h3><div class="fx" id="fx-1936"></div></div></div>
   </section>
 
-  <section class="note" id="method">
-    <p><b>Como é calculado.</b> Cada clube recebe uma força de ataque e de defesa estimada a partir de todos os jogos já disputados (modelo de Poisson, com mando de campo e peso maior para jogos recentes). Com isso, os jogos restantes são simulados 20.000 vezes; a chance de queda é a fração de simulações em que o clube termina entre o 17º e o 20º lugar (desempate: pontos, vitórias, saldo, gols pró).</p>
-    <p><b>Atualização.</b> Todo dia, de madrugada, o GitHub busca os resultados novos no placar público da ESPN, recalcula e grava o ponto da semana no gráfico (cada semana, de segunda a domingo, guarda o último cálculo feito nela). O botão Atualizar resultados faz a mesma busca na hora, direto do seu navegador; esse resultado fica salvo só neste navegador até a próxima atualização automática.</p>
+  <section class="card" id="how">
+    <header><h2>Como a conta é feita</h2><span class="eyebrow">passo a passo, com os números de agora</span></header>
+    <div class="tabs" role="tablist" aria-label="Explicação do cálculo">
+      <button class="tab" type="button" role="tab" id="tab-hoje" aria-controls="how-hoje" aria-selected="true">Chance atual</button>
+      <button class="tab" type="button" role="tab" id="tab-sim" aria-controls="how-sim" aria-selected="false" tabindex="-1">Simulador</button>
+      <button class="tab" type="button" role="tab" id="tab-upd" aria-controls="how-upd" aria-selected="false" tabindex="-1">Atualização</button>
+    </div>
+    <div class="howfor" id="howFor"></div>
+    <div role="tabpanel" id="how-hoje" aria-labelledby="tab-hoje"><div class="empty">A explicação aparece aqui assim que os dados carregarem.</div></div>
+    <div role="tabpanel" id="how-sim" aria-labelledby="tab-sim" hidden></div>
+    <div role="tabpanel" id="how-upd" aria-labelledby="tab-upd" hidden>
+      <ol class="steps">
+        <li><h3>Todo dia, de madrugada</h3><p>O GitHub busca os resultados novos no placar público da ESPN, refaz toda a conta e grava o ponto da semana no gráfico. Cada semana, de segunda a domingo, guarda o último cálculo feito nela. É isso que todo mundo vê ao abrir o site.</p></li>
+        <li><h3>Quando você clica em Atualizar resultados</h3><p>Seu navegador faz a mesma busca na hora e refaz a conta. Se houver jogos rolando, o placar e o minuto de cada um entram no cálculo (veja a aba Simulador). Esse resultado fica salvo só neste navegador, até a próxima atualização automática.</p></li>
+        <li><h3>O que fica no histórico</h3><p>O gráfico semanal só guarda resultados finais, nunca placares parciais. Se uma semana ficar sem atualização, o ponto dela é recalculado depois, só com os jogos que já tinham acontecido naquela época.</p></li>
+      </ol>
+    </div>
   </section>
 
 </div>
 
 <!-- O GitHub Pages deixa os arquivos em cache por 10 min: troque o ?v= sempre que mudar model.js ou core.js -->
-<script src="model.js?v=2026-10-24b"></script>
-<script src="core.js?v=2026-10-24b"></script>
+<script src="model.js?v=2026-10-29"></script>
+<script src="core.js?v=2026-10-29"></script>
 <script>
 (function(){
 var C=window.RebaixCore, GRE=C.GRE, INT=C.INT, FOCUS=[GRE,INT], SIMS=C.SIMS, SEED=C.SEED;
@@ -367,7 +408,7 @@ function renderAll(){
     td.appendChild(sp);tr.appendChild(td);
     [r.j,r.p,r.w,(r.gd>0?'+':'')+r.gd,c.expPts[t].toFixed(1).replace('.',','),pct(c.probs[t])].forEach(function(v){tr.appendChild(el('td','num',String(v)))});
     bindTip(tr,function(){return teamTip(t)},false);tb.appendChild(tr)});
-  simCompute();renderSim();
+  simCompute();renderSim();renderHow();
   drawChart();
 }
 
@@ -493,6 +534,91 @@ function renderSim(pending){
       row.appendChild(pk);box.appendChild(row)})});
   if(keep){var f=box.querySelector('[data-pk="'+keep+'"]');if(f)f.focus()}
 }
+/* ---------- como a conta é feita: passo a passo com os números do cálculo atual ---------- */
+var how={tab:'hoje',t:GRE,ex:null,exFor:null},HOW_TABS=['hoje','sim','upd'];
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function n2(v){return v.toFixed(2).replace('.',',')}
+function milhar(v){return Math.round(v).toLocaleString('pt-BR')}
+function pc0(p){return Math.round(p*100)+'%'}
+function vsMedia(v,mais,menos){var d=Math.round((v-1)*100);return d===0?'o mesmo que um time médio':Math.abs(d)+'% '+(d>0?mais:menos)+' que um time médio'}
+function poisP(l,k){var f=1;for(var i=2;i<=k;i++)f*=i;return Math.exp(-l)*Math.pow(l,k)/f}
+function margin(p,n){return 196*Math.sqrt(p*(1-p)/n)}
+function step(title,body){return '<li><h3>'+title+'</h3>'+body+'</li>'}
+function byDate(a,b){return (a.date||'9')<(b.date||'9')?-1:1}
+function nextGame(c,t){return c.remainingGames.filter(function(g){return (g.h===t||g.a===t)&&!g.live}).sort(byDate)[0]||null}
+function goals(m,g){return [m.bh*m.att[g.h]*m.def[g.a],m.ba*m.att[g.a]*m.def[g.h]]}
+/* três temporadas sorteadas, só para ilustrar (refeitas quando o cálculo muda) */
+function exSeasons(){if(how.exFor!==state.cur){how.exFor=state.cur;how.ex=[1,2,3].map(function(i){return window.RebaixModel.run(state.games,TEAMS,Date.now(),1,SEED+i,{live:state.live})})}return how.ex}
+function posIn(r,t){return r.posHist[t].indexOf(1)+1}
+
+function howHoje(c,t){
+  var m=c.model,tb=c.table[t],T=esc(nm(t)),g=nextGame(c,t),N=Math.round(c.probs[t]*SIMS),s='';
+  var ra=TEAMS.slice().sort(function(a,b){return m.att[b]-m.att[a]}).indexOf(t)+1,rd=TEAMS.slice().sort(function(a,b){return m.def[a]-m.def[b]}).indexOf(t)+1;
+  s+=step('Onde o '+T+' está','<p>O '+T+' tem <b>'+tb.p+' pontos em '+tb.j+' jogos</b> e ainda faltam '+(38-tb.j)+'. No campeonato inteiro, faltam '+c.remaining+' dos 380 jogos'+(c.live?' (contando os '+c.live+' que estão em andamento)':'')+'.</p><p>A pergunta é: somando o que já aconteceu com o que ainda pode acontecer, em quantos dos finais possíveis o '+T+' termina entre o 17º e o 20º lugar?</p>');
+  s+=step('A força de cada time','<p>O modelo olha os '+c.played+' jogos já disputados. Em média, o time da casa marca <b>'+n2(m.bh)+'</b> gols por jogo, e o visitante, <b>'+n2(m.ba)+'</b>. Cada clube ganha duas notas, em que 1,00 é um time médio:</p>'+
+    '<div class="calc"><div>Ataque do '+T+': <b>'+n2(m.att[t])+'</b>, marca '+vsMedia(m.att[t],'mais','menos')+' ('+ord(ra)+' melhor ataque)</div>'+
+    '<div>Defesa do '+T+': <b>'+n2(m.def[t])+'</b>, sofre '+vsMedia(m.def[t],'mais','menos')+' ('+ord(rd)+' melhor defesa)</div><div class="why">Na defesa, quanto menor a nota, melhor.</div></div>'+
+    '<p>As notas comparam os gols de cada jogo com o que seria esperado contra aquele adversário: marcar 2 gols no líder vale mais do que marcar 2 no lanterna. Há dois cuidados. Jogos recentes pesam mais: um jogo de 3 meses atrás vale 71% de um de hoje, e um de 6 meses atrás vale metade. E todo clube começa como se já tivesse 10 jogos de time médio, para uma goleada isolada não distorcer as notas.</p>');
+  if(g){var l=goals(m,g),H=esc(nm(g.h)),A=esc(nm(g.a)),home=g.h===t,w=home?g.pH:g.pA,lo=home?g.pA:g.pH,sc=[];
+    for(var x=0;x<=6;x++)for(var y=0;y<=6;y++)sc.push([x,y,poisP(l[0],x)*poisP(l[1],y)]);sc.sort(function(a,b){return b[2]-a[2]});
+    var row=function(name,lam){var r='<tr><td>'+name+'</td>',acc=0;for(var k=0;k<4;k++){var p=poisP(lam,k);acc+=p;r+='<td>'+pc0(p)+'</td>'}return r+'<td>'+pc0(1-acc)+'</td></tr>'};
+    s+=step('Gols esperados no próximo jogo','<p>O próximo jogo é <b>'+H+' x '+A+'</b>'+(g.date?' ('+fmtDate(g.date)+')':'')+'. Para cada lado, multiplica-se a média de gols pela nota de ataque de quem chuta e pela nota de defesa de quem leva:</p>'+
+      '<div class="calc"><div>'+H+': '+n2(m.bh)+' (média da casa) × '+n2(m.att[g.h])+' (ataque) × '+n2(m.def[g.a])+' (defesa adversária) = <b>'+n2(l[0])+' gols</b></div>'+
+      '<div>'+A+': '+n2(m.ba)+' (média do visitante) × '+n2(m.att[g.a])+' (ataque) × '+n2(m.def[g.h])+' (defesa adversária) = <b>'+n2(l[1])+' gols</b></div></div>'+
+      '<p>Ninguém marca '+n2(l[0])+' gols: isso é uma média. Para virar chance de 0, 1, 2 ou 3 gols, o modelo usa a distribuição de Poisson, a conta clássica para coisas que acontecem poucas vezes num jogo, como gols:</p>'+
+      '<div class="scroll"><table class="mini num"><thead><tr><th>Gols</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4+</th></tr></thead><tbody>'+row(H,l[0])+row(A,l[1])+'</tbody></table></div>'+
+      '<p>Cruzando todos os placares possíveis, o '+T+' tem <b>'+pc0(w)+' de chance de vencer</b>, '+pc0(g.pD)+' de empatar e '+pc0(lo)+' de perder. Os placares mais prováveis, com os gols do '+H+' primeiro, são '+sc.slice(0,3).map(function(q){return q[0]+'×'+q[1]+' ('+pc0(q[2])+')'}).join(', ').replace(/, ([^,]*)$/,' e $1')+'.</p>');
+  }
+  var ex=exSeasons();
+  s+=step('Sortear o resto do campeonato','<p>O computador faz essa conta para cada um dos '+c.remaining+' jogos que faltam e sorteia um placar para cada um, respeitando essas chances, como um dado viciado. Depois soma os pontos e monta a tabela final com os desempates do regulamento: pontos, vitórias, saldo de gols, gols marcados e, se ainda empatar, sorteio. Isso é uma <b>temporada simulada</b>, e cada sorteio dá um final diferente. Três exemplos:</p>'+
+    '<div class="scroll"><table class="mini"><thead><tr><th>Temporada</th><th>'+T+'</th><th style="text-align:left">Caíram</th></tr></thead><tbody>'+ex.map(function(r,i){var p=posIn(r,t);
+      var down=TEAMS.filter(function(x){return posIn(r,x)>=17}).sort(function(a,b){return posIn(r,a)-posIn(r,b)}).map(function(x){return esc(nm(x))}).join(', ');
+      return '<tr><td>'+(i+1)+'ª</td><td class="num'+(p>=17?' z':'')+'">'+ord(p)+', '+Math.round(r.expPts[t])+' pts</td><td style="text-align:left">'+down+'</td></tr>'}).join('')+'</tbody></table></div>');
+  s+=step('Repetir '+SIMS.toLocaleString('pt-BR')+' vezes e contar','<p>A conta é repetida '+SIMS.toLocaleString('pt-BR')+' vezes, cada uma com sorteios diferentes. O '+T+' terminou no Z-4 em <b>'+milhar(N)+'</b> delas:</p>'+
+    '<div class="calc"><div>'+milhar(N)+' ÷ '+SIMS.toLocaleString('pt-BR')+' = <b>'+pct(c.probs[t])+' de chance de queda</b></div></div>'+
+    '<p>Os outros números do painel saem do mesmo jeito. Os pontos projetados ('+pp(c.expPts[t])+') são a média de pontos nas '+SIMS.toLocaleString('pt-BR')+' temporadas, e a faixa “Onde termina o campeonato”, nos cartões do topo, mostra em quantas ele terminou em cada posição.</p>');
+  s+=step('Quão preciso é isso','<p>'+(N>0&&N<SIMS?'Como é sorteio, existe uma margem: com '+SIMS.toLocaleString('pt-BR')+' temporadas, ela fica em torno de ±'+pp(margin(c.probs[t],SIMS))+' ponto percentual. ':'')+'O sorteio usa sempre a mesma semente, então, com os mesmos resultados, a conta dá sempre o mesmo número.</p><p>O modelo só enxerga gols marcados e sofridos. Ele não sabe de lesões, troca de técnico, calendário apertado nem motivação, e trata todos os jogos que faltam como independentes.</p>');
+  return '<ol class="steps">'+s+'</ol>';
+}
+
+function howSim(c,t){
+  var m=c.model,T=esc(nm(t)),g=nextGame(c,t),s='';
+  if(g&&c.cond[g.h+'-'+g.a]){var cs=c.cond[g.h+'-'+g.a],home=g.h===t,H=esc(nm(g.h)),A=esc(nm(g.a)),N=Math.round(c.probs[t]*SIMS);
+    var rows=[['Vitória',home?0:2],['Empate',1],['Derrota',home?2:0]].map(function(r){var n=cs.n[r[1]],k=cs.rel[t][r[1]];return {name:r[0],n:n,k:k,q:n?k/n:0}});
+    s+=step('Cada botão é uma conta de separar e contar','<p>Nas mesmas '+SIMS.toLocaleString('pt-BR')+' temporadas da aba anterior, o jogo <b>'+H+' x '+A+'</b> também foi sorteado. Basta separar as temporadas pelo resultado desse jogo e contar em quantas o '+T+' caiu:</p>'+
+      '<div class="scroll"><table class="mini num"><thead><tr><th>Resultado</th><th>Temporadas</th><th>Caiu</th><th>Queda</th></tr></thead><tbody>'+rows.map(function(r){return '<tr><td>'+r.name+'</td><td>'+milhar(r.n)+'</td><td>'+milhar(r.k)+'</td><td>'+pct(r.q)+'</td></tr>'}).join('')+
+      '<tr><td><b>Total</b></td><td>'+SIMS.toLocaleString('pt-BR')+'</td><td>'+milhar(N)+'</td><td><b>'+pct(c.probs[t])+'</b></td></tr></tbody></table></div>'+
+      '<p>No botão de vitória desse jogo, o número pequeno é a chance de o resultado acontecer (cerca de '+milhar(rows[0].n)+' em '+SIMS.toLocaleString('pt-BR')+', ou '+pc0(rows[0].n/SIMS)+'), e o número grande é a chance de queda dentro desse grupo: '+milhar(rows[0].k)+' ÷ '+milhar(rows[0].n)+' = <b>'+pct(rows[0].q)+'</b>. Somando os três grupos, volta-se aos '+pct(c.probs[t])+' de hoje.</p>');
+    s+=step('Quando você escolhe um resultado','<p>As '+SIMS.toLocaleString('pt-BR')+' temporadas são refeitas do zero, mas, nesse jogo, o sorteio só aceita placares com o resultado escolhido: se você fixou a vitória do '+T+' e saiu um empate, sorteia de novo. Assim o placar continua realista (1×0, 2×1, às vezes 3×0), o que importa para o saldo de gols no desempate.</p>'+
+      '<p>Todos os outros jogos continuam sorteados normalmente, e, se você escolher vários resultados, todos valem juntos. O número no topo do simulador é a chance de queda nessas novas temporadas, e os botões dos outros jogos passam a contar só com elas. Por isso um jogo do Grêmio também mexe na chance do Inter: os dois disputam as mesmas vagas fora do Z-4.</p>');
+    var thin=rows.slice().sort(function(a,b){return a.n-b.n})[0];
+    s+=step('Por que os valores oscilam um pouco','<p>Cada grupo tem menos temporadas que o total. '+thin.name+', por exemplo, aconteceu em só '+milhar(thin.n)+' das '+SIMS.toLocaleString('pt-BR')+'. Com menos sorteios, a margem cresce para cerca de ±'+pp(margin(thin.q,Math.max(1,thin.n)))+' ponto percentual, e um valor pode mudar um pouco quando você mexe em outro jogo.</p>');
+  }else s+=step('Sem jogos para simular','<p>O '+T+' não tem mais jogos a disputar, então não há resultados para escolher.</p>');
+  // jogo em andamento: um real, se houver; senão, um exemplo com o próximo jogo
+  var lg=c.remainingGames.filter(function(x){return x.live&&(x.h===t||x.a===t)})[0]||c.remainingGames.filter(function(x){return x.live})[0],G=lg||g;
+  if(G){var L=lg?lg.live:{hs:G.h===t?1:0,as:G.h===t?0:1,min:60},l=goals(m,G),f=window.RebaixModel.leftFrac(L.min),H2=esc(nm(G.h)),A2=esc(nm(G.a));
+    var who=G.a===t?t:G.h,W=esc(nm(who)),wi=who===G.h?0:2,before=window.RebaixModel.wdl(l[0],l[1]),after=window.RebaixModel.wdl(l[0]*f,l[1]*f,L.hs,L.as);
+    s+=step('Jogos em andamento',(lg?'<p>Agora mesmo, '+H2+' x '+A2+' está <b>'+L.hs+'×'+L.as+'</b> ('+esc(L.detail)+').':'<p>Imagine que '+H2+' x '+A2+' está no minuto 60, com <b>'+L.hs+'×'+L.as+'</b>.')+
+      ' Contando uns 3 minutos de acréscimo, faltam cerca de '+Math.max(2,Math.round(93-L.min))+' dos 93 minutos, ou '+pc0(f)+' do jogo. Os gols esperados encolhem na mesma proporção:</p>'+
+      '<div class="calc"><div>'+H2+': '+n2(l[0])+' gols no jogo todo → <b>'+n2(l[0]*f)+'</b> no que falta</div><div>'+A2+': '+n2(l[1])+' → <b>'+n2(l[1]*f)+'</b></div></div>'+
+      '<p>Partindo do placar atual e sorteando só o resto, a chance de vitória do '+W+' vai de '+pc0(before[wi])+', antes de a bola rolar, para <b>'+pc0(after[wi])+'</b>. O resto do campeonato segue sorteado como antes.</p>'+
+      '<p>Isso entra na conta quando alguém clica em Atualizar resultados com jogos rolando. A classificação passa a mostrar a situação daquele momento, mas o histórico semanal só guarda resultados finais.</p>');
+  }
+  return '<ol class="steps">'+s+'</ol>';
+}
+
+function renderHow(){var c=state.cur;if(!c)return;
+  var bx=$('howFor');bx.textContent='';bx.appendChild(document.createTextNode('Exemplo:'));
+  FOCUS.forEach(function(t){var b=el('button','seg '+(t===GRE?'gre':'int'));b.type='button';b.setAttribute('aria-pressed',how.t===t?'true':'false');b.appendChild(crest(t,22));b.appendChild(document.createTextNode(t===INT?'Inter':nm(t)));
+    b.addEventListener('click',function(){how.t=t;renderHow()});bx.appendChild(b)});
+  $('how-hoje').innerHTML=howHoje(c,how.t);$('how-sim').innerHTML=howSim(c,how.t);
+}
+function setHowTab(k,focus){how.tab=k;HOW_TABS.forEach(function(x){var b=$('tab-'+x),on=x===k;b.setAttribute('aria-selected',on?'true':'false');b.tabIndex=on?0:-1;$('how-'+x).hidden=!on});
+  $('howFor').hidden=k==='upd';if(focus)$('tab-'+k).focus()}
+HOW_TABS.forEach(function(x,i){var b=$('tab-'+x);b.addEventListener('click',function(){setHowTab(x)});
+  b.addEventListener('keydown',function(e){var d=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;if(d){e.preventDefault();setHowTab(HOW_TABS[(i+d+HOW_TABS.length)%HOW_TABS.length],true)}})});
+$('howLink').addEventListener('click',function(){setHowTab('sim')});
+
 function sortSnaps(a){return a.sort(function(x,y){return x.week<y.week?-1:1})}
 async function getJSON(u){var r=await fetch(u+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw {code:'http',message:u+' respondeu '+r.status};return r.json()}
 function updatedLine(){return state.updatedAt?'Dados de '+fmtDate(state.updatedAt,{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' · fonte: '+state.source:''}

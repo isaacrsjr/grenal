@@ -9,6 +9,7 @@ Painel com a chance de Grêmio e Internacional caírem para a Série B no Brasil
 - **Risco de todos os clubes** de terminar no Z-4.
 - **Classificação** atual, com pontos projetados (média das simulações).
 - **Simulador dos jogos que faltam** para a dupla Gre-Nal: em cada jogo, a chance de vitória, empate e derrota e a chance de queda se cada resultado acontecer. Dá para fixar resultados e ver a chance de queda dos dois clubes recalculada na hora; as escolhas ficam salvas só no navegador de quem usa.
+- **Como a conta é feita**, no fim da página: o passo a passo do cálculo em linguagem simples, com os números de agora (notas de ataque e defesa, gols esperados do próximo jogo, temporadas sorteadas, contagem das quedas), em abas para a chance atual, o simulador e jogos ao vivo, e a atualização.
 
 Passe o mouse sobre gráficos e tabelas para ver os detalhes. Os escudos vêm da ESPN (`a.espncdn.com`).
 

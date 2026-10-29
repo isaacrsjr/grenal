@@ -84,5 +84,5 @@
     out.live=lv.filter(Boolean).length;
     return out;
   }
-  root.RebaixModel={run:run,fit:fit,wdl:wdl};
+  root.RebaixModel={run:run,fit:fit,wdl:wdl,leftFrac:leftFrac};
 })(typeof window!=='undefined'?window:module.exports);
