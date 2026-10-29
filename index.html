@@ -66,7 +66,7 @@ button.btn[disabled]{opacity:.55;cursor:not-allowed}
 #chart svg{display:block;width:100%;height:auto}
 .tip{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.12);white-space:nowrap}
 .tip b{font-family:var(--display);font-size:15px}
-.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,470px),1fr));gap:16px}
 .scroll{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:14px}
 th{font-family:var(--display);font-weight:600;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:right;padding:6px 6px;border-bottom:1px solid var(--line)}
@@ -83,6 +83,12 @@ td:first-child{white-space:nowrap}
 .tlive{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:0 6px;border-radius:99px;background:var(--grid);font-variant-numeric:tabular-nums}
 .tlive .ldot{width:6px;height:6px}
 .tlive.w{color:var(--ok)} .tlive.d{color:var(--muted)} .tlive.l{color:var(--z4-ink)}
+th.fcol,td.fcol{text-align:center}
+.form{display:inline-flex;gap:2px;vertical-align:middle}
+.form i{font-style:normal;width:16px;height:16px;border-radius:3px;display:inline-grid;place-items:center;font-size:10px;font-weight:700;line-height:1;color:var(--bg)}
+.form i.w{background:var(--ok)} .form i.d{background:var(--muted)} .form i.l{background:var(--z4-ink)}
+.form i.x{background:none;border:1px dashed var(--line)}
+.form.sub{display:none}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--line)}
 .bars{display:flex;flex-direction:column;gap:6px}
 .bar{display:grid;grid-template-columns:110px 1fr 56px;gap:10px;align-items:center;font-size:14px}
@@ -210,7 +216,7 @@ table.mini{width:auto;min-width:min(100%,380px);font-size:13px;margin:10px 0}
 .tip-r .k{display:flex;align-items:center;gap:6px}
 .tip-r .v{font-variant-numeric:tabular-nums;font-weight:600}
 .tip-sep{border-top:1px solid var(--line);margin:5px 0}
-@media (max-width:520px){.hero{grid-template-columns:1fr}.hero .facts{grid-column:1;grid-row:auto;flex-direction:row;flex-wrap:wrap;justify-content:flex-start;text-align:left;gap:14px 20px;margin-top:8px}.refresh{align-items:flex-start}.status{text-align:left}.bar{grid-template-columns:90px 1fr 50px}.simbar{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;padding:8px 0}.simclub{gap:6px}.simclub .crest{width:24px;height:24px}.simclub .sn{font-size:13px}.simclub .sv{font-size:24px}.sd .hoje{display:none}.simact{grid-column:1/-1;justify-content:space-between}.simact{margin-left:0;flex-direction:row;align-items:center;gap:10px;width:100%}.pk{padding:5px 6px}.pk-v{font-size:17px}.steps>li{padding-left:0}.steps>li::before{position:static;float:left;width:24px;height:24px;font-size:14px;margin:0 8px 0 0}.mini th,.mini td,.mini th:nth-child(2),.mini td:nth-child(2){padding:4px 6px}.tab{font-size:15px;padding:6px 6px 8px}.calc{padding:8px 10px}}
+@media (max-width:520px){.hero{grid-template-columns:1fr}.hero .facts{grid-column:1;grid-row:auto;flex-direction:row;flex-wrap:wrap;justify-content:flex-start;text-align:left;gap:14px 20px;margin-top:8px}.refresh{align-items:flex-start}.status{text-align:left}.bar{grid-template-columns:90px 1fr 50px}.simbar{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;padding:8px 0}.simclub{gap:6px}.simclub .crest{width:24px;height:24px}.simclub .sn{font-size:13px}.simclub .sv{font-size:24px}.sd .hoje{display:none}.simact{grid-column:1/-1;justify-content:space-between}.simact{margin-left:0;flex-direction:row;align-items:center;gap:10px;width:100%}.pk{padding:5px 6px}.pk-v{font-size:17px}#table .opt{display:none}#table .form.sub{display:flex;margin:3px 0 0 26px}#table .form.sub i{width:13px;height:13px;font-size:9px}#table td,#table th{padding-left:4px;padding-right:4px}.steps>li{padding-left:0}.steps>li::before{position:static;float:left;width:24px;height:24px;font-size:14px;margin:0 8px 0 0}.mini th,.mini td,.mini th:nth-child(2),.mini td:nth-child(2){padding:4px 6px}.tab{font-size:15px;padding:6px 6px 8px}.calc{padding:8px 10px}}
 </style>
 
 </head>
@@ -251,7 +257,7 @@ table.mini{width:auto;min-width:min(100%,380px);font-size:13px;margin:10px 0}
     </section>
     <section class="card" id="tableCard">
       <header><h2>Classificação</h2><span class="eyebrow" id="tableNote">pts projetados = média das simulações</span></header>
-      <div class="scroll"><table id="table"><thead><tr><th>#</th><th>Clube</th><th>J</th><th>P</th><th>V</th><th>SG</th><th>Proj.</th><th>Queda</th></tr></thead><tbody><tr><td colspan="8" class="empty">—</td></tr></tbody></table></div>
+      <div class="scroll"><table id="table"><thead><tr><th>#</th><th>Clube</th><th>J</th><th>P</th><th class="opt">V</th><th>SG</th><th class="fcol opt">Últimos 5</th><th class="opt">Proj.</th><th>Queda</th></tr></thead><tbody><tr><td colspan="9" class="empty">—</td></tr></tbody></table></div>
     </section>
   </div>
 
@@ -321,12 +327,12 @@ function bindTip(node,build,focusable){
 }
 document.addEventListener('pointerdown',hideTip,true);
 window.addEventListener('scroll',hideTip,{passive:true});
-/* rows: [rótulo, valor, cor?, clube?] ou 'sep' */
+/* rows: [rótulo, valor, cor?, clube?, cor do valor?] ou 'sep' */
 function tipCard(t,title,sub,rows){var d=el('div'),h=el('div','tip-h');if(t)h.appendChild(crest(t,22));h.appendChild(el('b',null,title));d.appendChild(h);
   if(sub)d.appendChild(el('div','tip-sub',sub));
   rows.forEach(function(r){if(r==='sep'){d.appendChild(el('div','tip-sep'));return}
     var row=el('div','tip-r'),k=el('span','k');if(r[3])k.appendChild(crest(r[3],16));k.appendChild(document.createTextNode(r[0]));if(r[2])k.style.color=r[2];
-    row.appendChild(k);row.appendChild(el('span','v',r[1]));d.appendChild(row)});
+    row.appendChild(k);var v=el('span','v',r[1]);if(r[4])v.style.color=r[4];row.appendChild(v);d.appendChild(row)});
   return d}
 /* ---------- classificação de agora: resultados finais + placar dos jogos em andamento ---------- */
 function liveTable(c){var t={};TEAMS.forEach(function(k){var b=c.table[k];t[k]={p:b.p,w:b.w,gd:b.gd,gf:b.gf,j:b.j}});
@@ -346,7 +352,17 @@ function teamTip(t){var c=state.cur,r=state.lt[t],pos=state.rank.indexOf(t)+1,bp
     ['Pontos projetados',pp(c.expPts[t])],
     ['Posição mais provável',ord(bp[0])+' ('+pct(bp[1])+')'],'sep',
     ['Vitórias · saldo',r.w+' · '+(r.gd>0?'+':'')+r.gd],
-    ['Jogos restantes',String(38-r.j)]]))}
+    ['Jogos restantes',String(38-r.j)]].concat(formRows(t))))}
+/* ---------- últimos 5 jogos (só resultados finais, do mais antigo para o mais recente) ---------- */
+var RES={w:'V',d:'E',l:'D'},RES_LONG={w:'vitória',d:'empate',l:'derrota'};
+function lastGames(t,n){var out=[];Object.keys(state.games).forEach(function(k){var g=state.games[k],ab=k.split('-');if(g[1]!==1||(ab[0]!==t&&ab[1]!==t))return;
+    var home=ab[0]===t,gf=home?g[2]:g[3],ga=home?g[3]:g[2];out.push({date:g[0],opp:home?ab[1]:ab[0],home:home,gf:gf,ga:ga,r:gf>ga?'w':gf<ga?'l':'d'})});
+  return out.sort(function(a,b){return a.date<b.date?-1:1}).slice(-n)}
+function formBadges(t){var f=el('span','form'),L=lastGames(t,5);for(var i=L.length;i<5;i++)f.appendChild(el('i','x'));
+  L.forEach(function(g){f.appendChild(el('i',g.r,RES[g.r]))});
+  f.setAttribute('role','img');f.setAttribute('aria-label','Últimos jogos, do mais antigo ao mais recente: '+(L.map(function(g){return RES_LONG[g.r]}).join(', ')||'nenhum'));return f}
+function formRows(t){var L=lastGames(t,5).reverse();if(!L.length)return [];
+  return ['sep',['Últimos jogos','']].concat(L.map(function(g){return [fmtDate(g.date)+(g.home?' x ':' @ ')+nm(g.opp),RES[g.r]+' '+g.gf+'×'+g.ga,null,g.opp,g.r==='w'?'var(--ok)':g.r==='l'?'var(--z4-ink)':'var(--muted)']}))}
 function fmtDate(iso,opt){try{return new Date(iso).toLocaleDateString('pt-BR',Object.assign({timeZone:'America/Sao_Paulo'},opt||{day:'2-digit',month:'2-digit'}))}catch(e){return iso.slice(0,10)}}
 function setStatus(t,cls){var s=$('status');s.textContent=t||'';s.className='status'+(cls?' '+cls:'')}
 function tick(){return new Promise(function(r){setTimeout(r,20)})}
@@ -405,8 +421,11 @@ function renderAll(){
     var tdp=el('td','num',String(i+1)),mv=rank0.indexOf(t)-i;if(mv)tdp.appendChild(el('span','mv '+(mv>0?'up':'down'),(mv>0?'▲':'▼')+Math.abs(mv)));tr.appendChild(tdp);
     var td=el('td');var sp=el('span','tname');sp.appendChild(crest(t,20));sp.appendChild(document.createTextNode(nm(t)));
     var lv=liveOf(t);if(lv){var b=el('span','tlive '+(lv.gf>lv.ga?'w':lv.gf<lv.ga?'l':'d'));b.appendChild(el('span','ldot'));b.appendChild(document.createTextNode(lv.gf+'×'+lv.ga));sp.appendChild(b)}
-    td.appendChild(sp);tr.appendChild(td);
-    [r.j,r.p,r.w,(r.gd>0?'+':'')+r.gd,c.expPts[t].toFixed(1).replace('.',','),pct(c.probs[t])].forEach(function(v){tr.appendChild(el('td','num',String(v)))});
+    td.appendChild(sp);var fs=formBadges(t);fs.classList.add('sub');td.appendChild(fs);tr.appendChild(td); // no celular, os últimos 5 vão para baixo do nome
+    var cell=function(v,cls){var x=el('td','num'+(cls?' '+cls:''),String(v));tr.appendChild(x);return x};
+    cell(r.j);cell(r.p);cell(r.w,'opt');cell((r.gd>0?'+':'')+r.gd);
+    var tf=el('td','fcol opt');tf.appendChild(formBadges(t));tr.appendChild(tf);
+    cell(c.expPts[t].toFixed(1).replace('.',','),'opt');cell(pct(c.probs[t]));
     bindTip(tr,function(){return teamTip(t)},false);tb.appendChild(tr)});
   simCompute();renderSim();renderHow();
   drawChart();
