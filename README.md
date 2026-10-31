@@ -9,6 +9,7 @@ Painel com a chance de Grêmio e Internacional caírem para a Série B no Brasil
 - **Risco de todos os clubes** de terminar no Z-4.
 - **Classificação** atual, com os últimos 5 resultados de cada clube (V/E/D; o detalhe dos jogos aparece ao passar o mouse) e os pontos projetados (média das simulações). No celular, os últimos 5 ficam embaixo do nome e as colunas V e Proj. somem para a tabela caber na tela.
 - **Simulador dos jogos que faltam** para a dupla Gre-Nal: em cada jogo, a chance de vitória, empate e derrota e a chance de queda se cada resultado acontecer. Dá para fixar resultados e ver a chance de queda dos dois clubes recalculada na hora; as escolhas ficam salvas só no navegador de quem usa.
+- **Compartilhar a simulação:** os resultados escolhidos vão no próprio endereço (`#sim=mandante-visitante-resultado.…`, com os IDs da ESPN e 0 = vitória do mandante, 1 = empate, 2 = vitória do visitante). O botão Compartilhar abre o menu de compartilhar do celular (WhatsApp etc.) ou, no computador, copia o link com um texto pronto. Quem abre o link vê a mesma simulação, refeita com os dados de agora.
 - **Como a conta é feita**, no fim da página: o passo a passo do cálculo em linguagem simples, com os números de agora (notas de ataque e defesa, gols esperados do próximo jogo, temporadas sorteadas, contagem das quedas), em abas para a chance atual, o simulador e jogos ao vivo, e a atualização.
 
 Passe o mouse sobre gráficos e tabelas para ver os detalhes. Os escudos vêm da ESPN (`a.espncdn.com`).
@@ -76,6 +77,7 @@ Fonte dos placares: API pública da ESPN (`site.api.espn.com`, liga `bra.1`).
 | `.github/workflows/atualizar.yml` | agenda diária |
 | `data/games.json` | todos os jogos: `"mandante-visitante": [data, encerrado (0/1), gols mandante, gols visitante]`, com os IDs de clube da ESPN |
 | `data/snapshots.json` | um ponto por semana: chance de queda e pontos esperados de cada clube |
+| `og.jpg` | imagem de prévia do link no WhatsApp e nas redes (1200×630) |
 | `.nojekyll` | faz o GitHub Pages servir os arquivos sem processar com Jekyll |
 
 ## Para outra temporada
@@ -83,6 +85,6 @@ Fonte dos placares: API pública da ESPN (`site.api.espn.com`, liga `bra.1`).
 Os clubes estão fixos em `NAMES`, no topo de `core.js` (ID da ESPN → nome), e Grêmio (`6273`) e Inter (`1936`) aparecem nas constantes `GRE` e `INT`. Para uma nova temporada:
 
 1. Atualize a lista de clubes em `core.js` (os IDs aparecem na resposta da API da ESPN).
-2. Troque o ano nos textos de `index.html` (`<meta name="description">` e o subtítulo "Brasileirão Série A 2026").
+2. Troque o ano nos textos de `index.html` (`<meta name="description">`, as tags `og:` e o subtítulo "Brasileirão Série A 2026") e na imagem `og.jpg`.
 3. Zere os dados: `data/games.json` com `{"games": {}}` e `data/snapshots.json` com `[]`.
 4. Rode `node scripts/update.js`. O gráfico semanal recomeça a partir da semana atual.

@@ -5,6 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Chance de Grêmio e Internacional caírem para a Série B no Brasileirão 2026.">
 <title>Gre-Nal na Degola</title>
+<!-- prévia do link no WhatsApp e nas redes (og.jpg tem 1200×630) -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Gre-Nal na Degola">
+<meta property="og:title" content="Gre-Nal na Degola: a chance de Grêmio e Inter caírem">
+<meta property="og:description" content="Chance de rebaixamento atualizada todo dia no Brasileirão 2026. Simule os jogos que faltam e compartilhe a sua simulação.">
+<meta property="og:url" content="https://isaacrsjr.github.io/grenal/">
+<meta property="og:image" content="https://isaacrsjr.github.io/grenal/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Escudos de Grêmio e Internacional com o título Gre-Nal na Degola">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
 <style>
@@ -165,6 +177,12 @@ tbody tr.z4:hover td{filter:brightness(.97)}
 .btn2{font-family:var(--display);font-weight:600;font-size:14px;letter-spacing:.05em;text-transform:uppercase;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:4px 12px;cursor:pointer}
 .btn2:hover:not([disabled]){border-color:var(--muted)}
 .btn2[disabled]{opacity:.4;cursor:default}
+.btn2.pri{background:var(--accent);border-color:var(--accent);color:var(--bg);display:inline-flex;align-items:center;gap:6px}
+.btn2.pri:hover{filter:brightness(1.08)}
+.btn2.pri svg{width:14px;height:14px}
+.simbtns{display:flex;gap:6px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:60;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:calc(100vw - 32px);text-align:center}
+.toast[hidden]{display:none}
 .simst{min-height:1.2em}
 .simhelp{font-size:13px;color:var(--muted);margin:0 0 16px;max-width:75ch}
 .pick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
@@ -216,7 +234,7 @@ table.mini{width:auto;min-width:min(100%,380px);font-size:13px;margin:10px 0}
 .tip-r .k{display:flex;align-items:center;gap:6px}
 .tip-r .v{font-variant-numeric:tabular-nums;font-weight:600}
 .tip-sep{border-top:1px solid var(--line);margin:5px 0}
-@media (max-width:520px){.hero{grid-template-columns:1fr}.hero .facts{grid-column:1;grid-row:auto;flex-direction:row;flex-wrap:wrap;justify-content:flex-start;text-align:left;gap:14px 20px;margin-top:8px}.refresh{align-items:flex-start}.status{text-align:left}.bar{grid-template-columns:90px 1fr 50px}.simbar{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;padding:8px 0}.simclub{gap:6px}.simclub .crest{width:24px;height:24px}.simclub .sn{font-size:13px}.simclub .sv{font-size:24px}.sd .hoje{display:none}.simact{grid-column:1/-1;justify-content:space-between}.simact{margin-left:0;flex-direction:row;align-items:center;gap:10px;width:100%}.pk{padding:5px 6px}.pk-v{font-size:17px}#table .opt{display:none}#table .form.sub{display:flex;margin:3px 0 0 26px}#table .form.sub i{width:13px;height:13px;font-size:9px}#table td,#table th{padding-left:4px;padding-right:4px}.steps>li{padding-left:0}.steps>li::before{position:static;float:left;width:24px;height:24px;font-size:14px;margin:0 8px 0 0}.mini th,.mini td,.mini th:nth-child(2),.mini td:nth-child(2){padding:4px 6px}.tab{font-size:15px;padding:6px 6px 8px}.calc{padding:8px 10px}}
+@media (max-width:520px){.hero{grid-template-columns:1fr}.hero .facts{grid-column:1;grid-row:auto;flex-direction:row;flex-wrap:wrap;justify-content:flex-start;text-align:left;gap:14px 20px;margin-top:8px}.refresh{align-items:flex-start}.status{text-align:left}.bar{grid-template-columns:90px 1fr 50px}.simbar{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;padding:8px 0}.simclub{gap:6px}.simclub .crest{width:24px;height:24px}.simclub .sn{font-size:13px}.simclub .sv{font-size:24px}.sd .hoje{display:none}.simact{grid-column:1/-1;margin-left:0;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:6px 8px;width:100%}.simact .simst{order:2;text-align:right}.simact .simbtns{order:3;grid-column:1/-1}.simbtns .pri{flex:1;justify-content:center}.pk{padding:5px 6px}.pk-v{font-size:17px}#table .opt{display:none}#table .form.sub{display:flex;margin:3px 0 0 26px}#table .form.sub i{width:13px;height:13px;font-size:9px}#table td,#table th{padding-left:4px;padding-right:4px}.steps>li{padding-left:0}.steps>li::before{position:static;float:left;width:24px;height:24px;font-size:14px;margin:0 8px 0 0}.mini th,.mini td,.mini th:nth-child(2),.mini td:nth-child(2){padding:4px 6px}.tab{font-size:15px;padding:6px 6px 8px}.calc{padding:8px 10px}}
 </style>
 
 </head>
@@ -484,7 +502,7 @@ function lsGet(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function countDone(g){var n=0;for(var k in g)if(g[k][1]===1)n++;return n}
 /* fixed: { "h-a": 0|1|2 }; também cruza cada jogo da dupla com o rebaixamento dos dois */
-function compute(cutoff,fixed){return window.RebaixModel.run(state.games,TEAMS,cutoff,SIMS,SEED,{fixed:fixed||{},track:TRACK,trackTeams:FOCUS,live:state.live})}
+function compute(cutoff,fixed){var r=window.RebaixModel.run(state.games,TEAMS,cutoff,SIMS,SEED,{fixed:fixed||{},track:TRACK,trackTeams:FOCUS,live:state.live});r.tracked=true;return r}
 
 /* ---------- jogos em andamento ---------- */
 function renderLive(){var box=$('live'),keys=Object.keys(state.live||{});box.textContent='';box.hidden=!keys.length;if(!keys.length)return;
@@ -498,13 +516,31 @@ function renderLive(){var box=$('live'),keys=Object.keys(state.live||{});box.tex
 
 /* ---------- simulador de resultados ---------- */
 var TRACK=[];FOCUS.forEach(function(f){TEAMS.forEach(function(o){if(o!==f){TRACK.push(f+'-'+o);if(FOCUS.indexOf(o)<0)TRACK.push(o+'-'+f)}})});
-var LS_SIM='gn_sim_v1', sim={sel:lsGet(LS_SIM)||{}, res:null, timer:null};
+var LS_SIM='gn_sim_v1', sim={sel:lsGet(LS_SIM)||{}, res:null, timer:null, fromLink:false};
+/* ---------- compartilhar: os resultados escolhidos vão no link (#sim=mandante-visitante-resultado.…) ---------- */
+function simHash(sel){var ks=Object.keys(sel).sort();return ks.length?'#sim='+ks.map(function(k){return k+'-'+sel[k]}).join('.'):''}
+function readHash(){var m=/^#sim=([\d.-]+)$/.exec(location.hash);if(!m)return null;var sel={};
+  m[1].split('.').forEach(function(x){var p=x.split('-'),k=p[0]+'-'+p[1],c=+p[2];if(p.length===3&&TRACK.indexOf(k)>=0&&(c===0||c===1||c===2))sel[k]=c});
+  return Object.keys(sel).length?sel:null}
+// o endereço acompanha a simulação, então copiar da barra do navegador também funciona
+function syncHash(){var h=simHash(sim.sel);if(location.hash===h||(!h&&!/^#sim=/.test(location.hash)))return;try{history.replaceState(null,'',location.pathname+location.search+h)}catch(e){}}
+var fromLink=readHash();if(fromLink){sim.sel=fromLink;sim.fromLink=true}
+window.addEventListener('hashchange',function(){var sel=readHash();if(sel&&state.cur){sim.sel=sel;simSchedule();sim.fromLink=true;$('fixtures').scrollIntoView()}});
+function toast(msg){var t=$('toast');if(!t){t=el('div','toast');t.id='toast';t.setAttribute('role','status');document.body.appendChild(t)}
+  t.textContent=msg;t.hidden=false;clearTimeout(t._h);t._h=setTimeout(function(){t.hidden=true},3500)}
+async function shareSim(){var r=sim.res||state.cur,n=Object.keys(sim.sel).length,url=location.href.split(/[?#]/)[0]+simHash(sim.sel);
+  var text=n?'Na minha simulação do Gre-Nal na Degola ('+n+(n>1?' resultados escolhidos':' resultado escolhido')+'), o Grêmio fica com '+pct(r.probs[GRE])+' de chance de cair e o Inter com '+pct(r.probs[INT])+'. Faça a sua:'
+    :'Gre-Nal na Degola: hoje o Grêmio tem '+pct(r.probs[GRE])+' de chance de cair e o Inter, '+pct(r.probs[INT])+'. Simule os jogos que faltam:';
+  if(navigator.share){try{await navigator.share({title:'Gre-Nal na Degola',text:text,url:url});return}catch(e){if(e&&e.name==='AbortError')return}}
+  try{await navigator.clipboard.writeText(text+' '+url);toast('Link copiado. É só colar no WhatsApp ou nas redes.')}catch(e){window.prompt('Copie o link da sua simulação:',url)}}
+function shareIcon(){var NS='http://www.w3.org/2000/svg',s=document.createElementNS(NS,'svg');s.setAttribute('viewBox','0 0 24 24');s.setAttribute('aria-hidden','true');
+  s.innerHTML='<path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>';return s}
 function simCompute(){
-  if(!state.cur.cond)state.cur=compute(Date.now());
+  if(!state.cur.tracked)state.cur=compute(Date.now()); // o cálculo do histórico não cruza os jogos da dupla
   Object.keys(sim.sel).forEach(function(k){if(!state.cur.cond[k])delete sim.sel[k]}); // jogo já disputado
   sim.res=Object.keys(sim.sel).length?compute(Date.now(),sim.sel):state.cur;
 }
-function simSchedule(){lsSet(LS_SIM,sim.sel);renderSim(true);clearTimeout(sim.timer);
+function simSchedule(){lsSet(LS_SIM,sim.sel);sim.fromLink=false;syncHash();renderSim(true);clearTimeout(sim.timer);
   sim.timer=setTimeout(function(){simCompute();renderSim()},60)}
 function pick(key,code){if(sim.sel[key]===code)delete sim.sel[key];else sim.sel[key]=code;simSchedule()}
 function condQ(res,key,code,t){var cs=res.cond&&res.cond[key];return cs&&cs.n[code]>0?cs.rel[t][code]/cs.n[code]:null}
@@ -523,8 +559,9 @@ function renderSim(pending){
     else{dd.textContent=(d>0?'▲ ':'▼ ')+pp(Math.abs(d))+' p.p.';dd.appendChild(el('span','hoje',' (hoje '+pct(c.probs[t])+')'));dd.classList.add(d>0?'up':'down')}
     tx.appendChild(dd);b.appendChild(tx);bar.appendChild(b)});
   var act=el('div','simact');act.appendChild(el('div','num',nSel?nSel+(nSel>1?' resultados escolhidos':' resultado escolhido'):'nenhum resultado escolhido'));
-  var clr=el('button','btn2','Limpar');clr.type='button';clr.disabled=!nSel;clr.addEventListener('click',function(){sim.sel={};simSchedule()});act.appendChild(clr);
-  act.appendChild(el('div','simst',pending?'Recalculando…':''));bar.appendChild(act);
+  var btns=el('div','simbtns'),sh=el('button','btn2 pri');sh.type='button';sh.appendChild(shareIcon());sh.appendChild(document.createTextNode('Compartilhar'));sh.addEventListener('click',shareSim);btns.appendChild(sh);
+  var clr=el('button','btn2','Limpar');clr.type='button';clr.disabled=!nSel;clr.addEventListener('click',function(){sim.sel={};simSchedule()});btns.appendChild(clr);act.appendChild(btns);
+  act.appendChild(el('div','simst',pending?'Recalculando…':sim.fromLink&&nSel?'recebida por link':''));bar.appendChild(act);
   // jogos
   FOCUS.forEach(function(t){var box=$('fx-'+t);box.textContent='';
     var list=c.remainingGames.filter(function(g){return g.h===t||g.a===t}).sort(function(a,b){return (a.date||'9')<(b.date||'9')?-1:1});
@@ -652,6 +689,7 @@ async function load(){
     state.snaps=sortSnaps(Object.keys(by).map(function(k){return by[k]}));
     setStatus('Simulando '+SIMS.toLocaleString('pt-BR')+' temporadas…');await tick();
     state.cur=compute(Date.now());setStatus(updatedLine());renderAll();
+    syncHash();if(sim.fromLink)$('fixtures').scrollIntoView();
   }catch(e){$('meta').textContent='Não consegui carregar os dados do painel ('+(e&&e.message||e)+'). Recarregue a página.'}
 }
 
@@ -668,7 +706,7 @@ async function refresh(){
     setStatus('Simulando '+SIMS.toLocaleString('pt-BR')+' temporadas…');await tick();
     var res=await RebaixCore.updateSnapshots(games,state.snaps,Date.now(),window.RebaixModel,'navegador',tick);
     // o histórico fica só com resultados finais; a tela usa também o placar dos jogos em andamento
-    state.snaps=res.snaps;state.cur=Object.keys(live).length?compute(Date.now()):res.cur;state.updatedAt=new Date().toISOString();state.source='este navegador';
+    state.snaps=res.snaps;state.cur=compute(Date.now());state.updatedAt=new Date().toISOString();state.source='este navegador';
     lsSet(LS_G,{games:games,updatedAt:state.updatedAt});lsSet(LS_S,res.snaps);
     renderAll();
     setStatus((found.length?found.length+' resultado(s) novo(s): '+found.slice(0,4).join(', ')+(found.length>4?'…':'')+'.':'Nenhum resultado novo. Probabilidades recalculadas.')+(state.cur.live?' '+state.cur.live+(state.cur.live>1?' jogos em andamento entraram':' jogo em andamento entrou')+' no cálculo com o placar atual.':'')+' Salvo neste navegador.','ok');
