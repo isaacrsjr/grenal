@@ -20,7 +20,7 @@ O topo da página, abaixo do status da atualização, mostra o total de visitas,
 
 1. **Força dos clubes:** cada time recebe uma força de ataque e uma de defesa, estimadas por um modelo de Poisson a partir dos jogos já disputados, com mando de campo. Jogos recentes pesam mais (meia-vida de 180 dias), e todo clube começa com o equivalente a 10 jogos "médios", para o modelo não exagerar no início do campeonato.
 2. **Simulação:** os jogos restantes são simulados 20.000 vezes (Monte Carlo, com semente fixa, então o mesmo conjunto de jogos sempre dá o mesmo resultado).
-3. **Rebaixamento:** fração das simulações em que o clube termina entre o 17º e o 20º lugar. Desempate: pontos, vitórias, saldo, gols pró e, por fim, sorteio.
+3. **Rebaixamento:** fração das simulações em que o clube termina entre o 17º e o 20º lugar. Desempate: pontos, vitórias, saldo, gols pró, confronto direto (só quando o empate é entre dois clubes; conta os pontos nos jogos entre eles) e, por fim, sorteio (os cartões, que vêm antes do sorteio no regulamento, não entram).
 
 Os parâmetros ficam no topo de `model.js` (`HALF_LIFE_DAYS`, `PRIOR_GAMES`) e de `core.js` (`SIMS`, `SEED`).
 

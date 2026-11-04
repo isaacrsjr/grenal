@@ -357,7 +357,13 @@ function liveTable(c){var t={};TEAMS.forEach(function(k){var b=c.table[k];t[k]={
   Object.keys(state.live||{}).forEach(function(k){var L=state.live[k],ab=k.split('-'),H=t[ab[0]],A=t[ab[1]];if(!H||!A)return;
     H.j++;A.j++;H.gf+=L.hs;A.gf+=L.as;H.gd+=L.hs-L.as;A.gd+=L.as-L.hs;if(L.hs>L.as){H.p+=3;H.w++}else if(L.hs<L.as){A.p+=3;A.w++}else{H.p++;A.p++}});
   return t}
-function rankOf(tb){return TEAMS.slice().sort(function(a,b){var A=tb[a],B=tb[b];return B.p-A.p||B.w-A.w||B.gd-A.gd||B.gf-A.gf})}
+/* withLive: conta o placar dos jogos em andamento no confronto direto, como em liveTable */
+function rankOf(tb,withLive){var hp={},add=function(k,hs,as){var ab=k.split('-');if(hs>as)hp[k]=(hp[k]||0)+3;else if(hs<as)hp[ab[1]+'-'+ab[0]]=(hp[ab[1]+'-'+ab[0]]||0)+3;else{hp[k]=(hp[k]||0)+1;hp[ab[1]+'-'+ab[0]]=(hp[ab[1]+'-'+ab[0]]||0)+1}};
+  Object.keys(state.games).forEach(function(k){var g=state.games[k];if(g[1]===1)add(k,g[2],g[3])});
+  if(withLive)Object.keys(state.live||{}).forEach(function(k){var L=state.live[k];add(k,L.hs,L.as)});
+  var order=TEAMS.slice().sort(function(a,b){var A=tb[a],B=tb[b];return B.p-A.p||B.w-A.w||B.gd-A.gd||B.gf-A.gf});
+  window.RebaixModel.headToHead(order,function(a,b){var A=tb[a],B=tb[b];return A.p===B.p&&A.w===B.w&&A.gd===B.gd&&A.gf===B.gf},function(a,b){return hp[a+'-'+b]||0});
+  return order}
 /* jogo em andamento do clube, do ponto de vista dele: {gf, ga, opp, home, detail} */
 function liveOf(t){var ks=Object.keys(state.live||{});for(var i=0;i<ks.length;i++){var ab=ks[i].split('-'),L=state.live[ks[i]];
   if(ab[0]===t)return {gf:L.hs,ga:L.as,opp:ab[1],home:true,detail:L.detail};if(ab[1]===t)return {gf:L.as,ga:L.hs,opp:ab[0],home:false,detail:L.detail}}return null}
@@ -395,7 +401,7 @@ function renderAll(){
   Object.keys(state.games).forEach(function(k){var g=state.games[k];if(g[1]===1&&(!last||g[0]>last))last=g[0]});
   $('meta').textContent=played+' de 380 jogos disputados · último resultado em '+(last?fmtDate(last,{day:'2-digit',month:'long'}):'—')+' · '+SIMS.toLocaleString('pt-BR')+' simulações'+(c.live?' · '+c.live+(c.live>1?' jogos':' jogo')+' ao vivo no cálculo':'');
   renderLive();
-  var lt=liveTable(c),rank=rankOf(lt),rank0=rankOf(c.table),nLive=Object.keys(state.live||{}).length;
+  var lt=liveTable(c),rank=rankOf(lt,true),rank0=rankOf(c.table),nLive=Object.keys(state.live||{}).length;
   var snaps=state.snaps; state.rank=rank; state.rank0=rank0; state.lt=lt;
   var duo=$('duo'); if(!duo.firstChild){duo.appendChild(crest(GRE,40));duo.appendChild(crest(INT,40))}
   FOCUS.forEach(function(t){
@@ -626,7 +632,7 @@ function howHoje(c,t){
       '<p>Cruzando todos os placares possíveis, o '+T+' tem <b>'+pc0(w)+' de chance de vencer</b>, '+pc0(g.pD)+' de empatar e '+pc0(lo)+' de perder. Os placares mais prováveis, com os gols do '+H+' primeiro, são '+sc.slice(0,3).map(function(q){return q[0]+'×'+q[1]+' ('+pc0(q[2])+')'}).join(', ').replace(/, ([^,]*)$/,' e $1')+'.</p>');
   }
   var ex=exSeasons();
-  s+=step('Sortear o resto do campeonato','<p>O computador faz essa conta para cada um dos '+c.remaining+' jogos que faltam e sorteia um placar para cada um, respeitando essas chances, como um dado viciado. Depois soma os pontos e monta a tabela final com os desempates do regulamento: pontos, vitórias, saldo de gols, gols marcados e, se ainda empatar, sorteio. Isso é uma <b>temporada simulada</b>, e cada sorteio dá um final diferente. Três exemplos:</p>'+
+  s+=step('Sortear o resto do campeonato','<p>O computador faz essa conta para cada um dos '+c.remaining+' jogos que faltam e sorteia um placar para cada um, respeitando essas chances, como um dado viciado. Depois soma os pontos e monta a tabela final com os desempates do regulamento: pontos, vitórias, saldo de gols, gols marcados, confronto direto (quando o empate é entre só dois clubes) e, se ainda empatar, sorteio. Isso é uma <b>temporada simulada</b>, e cada sorteio dá um final diferente. Três exemplos:</p>'+
     '<div class="scroll"><table class="mini"><thead><tr><th>Temporada</th><th>'+T+'</th><th style="text-align:left">Caíram</th></tr></thead><tbody>'+ex.map(function(r,i){var p=posIn(r,t);
       var down=TEAMS.filter(function(x){return posIn(r,x)>=17}).sort(function(a,b){return posIn(r,a)-posIn(r,b)}).map(function(x){return esc(nm(x))}).join(', ');
       return '<tr><td>'+(i+1)+'ª</td><td class="num'+(p>=17?' z':'')+'">'+ord(p)+', '+Math.round(r.expPts[t])+' pts</td><td style="text-align:left">'+down+'</td></tr>'}).join('')+'</tbody></table></div>');

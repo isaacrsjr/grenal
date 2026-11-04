@@ -38,6 +38,11 @@
     var m=Math.max(h0,a0);return want===0?[Math.max(h0,a0+1),a0]:want===1?[m,m]:[h0,Math.max(a0,h0+1)];}
   /* fração do jogo que falta, a partir do minuto (com ~3 min de acréscimos) */
   function leftFrac(min){return Math.max(0.02,Math.min(1,(93-min)/93));}
+  /* Desempate do regulamento depois de pontos, vitórias, saldo e gols pró: confronto direto (pontos nos jogos entre os dois),
+     só quando o empate é entre exatamente dois clubes. Cartões não entram; o que sobrar fica na ordem recebida (sorteio).
+     order: já ordenado pelos quatro primeiros critérios; same(a,b): empatados neles; hp(a,b): pontos de a contra b */
+  function headToHead(order,same,hp){for(var r=0;r<order.length-1;){var e=r+1;while(e<order.length&&same(order[r],order[e]))e++;
+    if(e-r===2&&hp(order[r+1],order[r])>hp(order[r],order[r+1])){var x=order[r];order[r]=order[r+1];order[r+1]=x;}r=e;}}
 
   /* cutoffMs: games dated <= cutoff and done count as played
      opts.fixed: { "h-a": 0|1|2 } resultado imposto a jogos restantes (0 mandante, 1 empate, 2 visitante)
@@ -60,6 +65,10 @@
     var n=teams.length, rel={}, pts={}, posHist={};
     teams.forEach(function(t){rel[t]=0;pts[t]=0;posHist[t]=new Array(n).fill(0);});
     var idx={};teams.forEach(function(t,i){idx[t]=i;});
+    /* HP[i*n+j]: pontos de i contra j (confronto direto) */
+    var HP0=new Float64Array(n*n),HP=new Float64Array(n*n);
+    played.forEach(function(g){var hi=idx[g.h],ai=idx[g.a];if(g.hs>g.as)HP0[hi*n+ai]+=3;else if(g.hs<g.as)HP0[ai*n+hi]+=3;else{HP0[hi*n+ai]++;HP0[ai*n+hi]++;}});
+    var same=function(a,b){return P[a]===P[b]&&Wn[a]===Wn[b]&&GD[a]===GD[b]&&GF[a]===GF[b];},hp=function(a,b){return HP[a*n+b];};
     var P=new Float64Array(n),Wn=new Float64Array(n),GD=new Float64Array(n),GF=new Float64Array(n),TB=new Float64Array(n),order=teams.map(function(_,i){return i;});
     var fixed=opts.fixed||{}, fx=remaining.map(function(g){var v=fixed[g.h+'-'+g.a];return v===0||v===1||v===2?v:-1;});
     var tkTeams=(opts.trackTeams||[]).map(function(t){return idx[t];});
@@ -67,12 +76,14 @@
     var oc=new Int8Array(remaining.length),relNow=new Uint8Array(n);
     for(var s=0;s<nSims;s++){
       for(var i=0;i<n;i++){var b=base[teams[i]];P[i]=b.p;Wn[i]=b.w;GD[i]=b.gd;GF[i]=b.gf;TB[i]=rnd();}
+      HP.set(HP0);
       for(k=0;k<remaining.length;k++){var g=remaining[k],hi=idx[g.h],ai=idx[g.a],x,y;
         var h0=lv[k]?lv[k].hs:0,a0=lv[k]?lv[k].as:0;
         if(fx[k]<0){x=h0+poisson(lam[k][0],rnd);y=a0+poisson(lam[k][1],rnd);}else{var sc=poissonOutcome(lam[k][0],lam[k][1],fx[k],rnd,h0,a0);x=sc[0];y=sc[1];}
         oc[k]=x>y?0:x===y?1:2;
-        GF[hi]+=x;GF[ai]+=y;GD[hi]+=x-y;GD[ai]+=y-x;if(x>y){P[hi]+=3;Wn[hi]++;}else if(x<y){P[ai]+=3;Wn[ai]++;}else{P[hi]++;P[ai]++;}}
+        GF[hi]+=x;GF[ai]+=y;GD[hi]+=x-y;GD[ai]+=y-x;if(x>y){P[hi]+=3;Wn[hi]++;HP[hi*n+ai]+=3;}else if(x<y){P[ai]+=3;Wn[ai]++;HP[ai*n+hi]+=3;}else{P[hi]++;P[ai]++;HP[hi*n+ai]++;HP[ai*n+hi]++;}}
       order.sort(function(a,b){return P[b]-P[a]||Wn[b]-Wn[a]||GD[b]-GD[a]||GF[b]-GF[a]||TB[b]-TB[a];});
+      headToHead(order,same,hp);
       for(var r=0;r<n;r++){var t=teams[order[r]];posHist[t][r]++;relNow[order[r]]=r>=n-4?1:0;if(r>=n-4)rel[t]++;pts[t]+=P[order[r]];}
       for(var q=0;q<tk.length;q++){var o=oc[tk[q].k];tk[q].n[o]++;for(var z=0;z<tkTeams.length;z++)tk[q].rel[z][o]+=relNow[tkTeams[z]];}
     }
@@ -84,5 +95,5 @@
     out.live=lv.filter(Boolean).length;
     return out;
   }
-  root.RebaixModel={run:run,fit:fit,wdl:wdl,leftFrac:leftFrac};
+  root.RebaixModel={run:run,fit:fit,wdl:wdl,leftFrac:leftFrac,headToHead:headToHead};
 })(typeof window!=='undefined'?window:module.exports);
