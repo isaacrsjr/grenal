@@ -2,8 +2,11 @@ name: Atualizar resultados
 
 on:
   schedule:
-    # Todo dia às 06:17 UTC (03:17 em Brasília), depois dos jogos da noite
-    - cron: '17 6 * * *'
+    # Horários em UTC (Brasília = UTC-3, sem horário de verão)
+    # Antes dos jogos: 09:47 em Brasília. O jogo mais cedo da temporada começou às 11h (domingo).
+    - cron: '47 12 * * *'
+    # Depois dos jogos: 00:43 em Brasília. O jogo mais tarde começa às 21h30 e termina por volta de 23h30.
+    - cron: '43 3 * * *'
   workflow_dispatch: {}
 
 permissions:

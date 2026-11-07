@@ -46,6 +46,10 @@
     var have={};snaps.forEach(function(s){have[s.week]=1});
     var lastWeek=snaps.length?snaps[snaps.length-1].week:null;var changed=[];
     var run=function(cut){return Model.run(games,TEAMS,cut,SIMS,SEED)};
+    // Jogos de domingo à noite só chegam na madrugada de segunda: fecha a semana anterior com eles
+    if(lastWeek&&lastWeek<weekKey(now)){var lw=Date.parse(lastWeek+'T03:00:00Z');var rl=run(lw+7*864e5-1);var old=snaps[snaps.length-1];
+      if(rl.played>old.played){var sl=snapFrom(rl,lastWeek);sl.source=source;sl.updatedAt=new Date(now).toISOString();snaps[snaps.length-1]=sl;changed.push(sl)}
+      if(onTick)await onTick()}
     if(lastWeek){for(var w=Date.parse(lastWeek+'T03:00:00Z')+7*864e5;w<weekStartMs(now);w+=7*864e5){
       var k=new Date(w).toISOString().slice(0,10);if(have[k])continue;var rw=run(w+7*864e5-1);
       var prev=snaps[snaps.length-1];if(!prev||rw.played>prev.played){var sn=snapFrom(rw,k);sn.source=source;snaps.push(sn);changed.push(sn)}
