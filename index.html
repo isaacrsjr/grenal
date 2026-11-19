@@ -113,7 +113,10 @@ th.fcol,td.fcol{text-align:center}
 .fxrow{display:flex;flex-direction:column;gap:6px;font-size:14px}
 .fxrow .d{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums;min-width:3.2em}
 .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
-.cols h3{font-size:18px;text-transform:uppercase;margin-bottom:8px}
+.cols h3,.rivals h3{font-size:18px;text-transform:uppercase;margin-bottom:8px}
+.rivals{margin-top:28px;padding-top:20px;border-top:1px solid var(--line)}
+.rivals .simhelp{margin-bottom:12px}
+.rivfx{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px 20px}
 .empty{color:var(--muted);padding:24px 0;text-align:center}
 .note{font-size:13px;color:var(--muted);max-width:75ch}
 .note p{margin:.4em 0}
@@ -195,11 +198,16 @@ tbody tr.z4:hover td{filter:brightness(.97)}
 .pk.w.on{border-color:var(--ok);color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,var(--panel))}
 .pk.e.on{border-color:var(--muted);color:var(--muted);background:var(--grid)}
 .pk.l.on{border-color:var(--z4-ink);color:var(--z4-ink);background:color-mix(in srgb,var(--z4-ink) 12%,var(--panel))}
+.pk.n.on{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--panel))}
+.pk-l .nm{overflow:hidden;text-overflow:ellipsis}
+.pk-v2{display:flex;flex-direction:column;font-family:var(--display);font-weight:700;font-size:15px;line-height:1.25}
+.pk-v2 span{display:flex;align-items:center;gap:4px}
+.pk-v2 .up{color:var(--z4-ink)} .pk-v2 .down{color:var(--ok)}
 .pk.on .pk-l{color:inherit;font-weight:600}
 .pk.on .pk-v{color:var(--ink)}
 .pk.off{opacity:.5}
-#fixtures .pk-v,#fixtures .sv{transition:opacity .15s}
-#fixtures.pending .pk-v,#fixtures.pending .sv{opacity:.35}
+#fixtures .pk-v,#fixtures .pk-v2,#fixtures .sv{transition:opacity .15s}
+#fixtures.pending .pk-v,#fixtures.pending .pk-v2,#fixtures.pending .sv{opacity:.35}
 /* Como a conta é feita */
 .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px;overflow-x:auto;scrollbar-width:none}
 .tab{font-family:var(--display);font-weight:600;font-size:16px;letter-spacing:.04em;text-transform:uppercase;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);padding:6px 10px 8px;margin-bottom:-1px;cursor:pointer;white-space:nowrap}
@@ -284,6 +292,9 @@ table.mini{width:auto;min-width:min(100%,380px);font-size:13px;margin:10px 0}
     <div class="simbar" id="simbar"></div>
     <p class="simhelp">Toque num resultado para fixá-lo; toque de novo para soltar. Em cada botão, o número grande é a chance de queda do clube se aquele resultado acontecer (levando em conta os outros já escolhidos) e o pequeno é a chance do próprio resultado. Como tudo vem de simulações, os valores podem oscilar cerca de 1 ponto entre um cálculo e outro. <a href="#how" id="howLink">Entenda a conta</a>.</p>
     <div class="cols"><div><h3 style="color:var(--gre)">Grêmio</h3><div class="fx" id="fx-6273"></div></div><div><h3 style="color:var(--int)">Internacional</h3><div class="fx" id="fx-1936"></div></div></div>
+    <div class="rivals"><h3>Jogos dos concorrentes</h3>
+      <p class="simhelp">Jogos que faltam entre os outros clubes com chance de cair. Em cada botão, os números grandes são a chance de queda do Grêmio e do Inter se aquele resultado acontecer, e o pequeno é a chance do próprio resultado.</p>
+      <div class="rivfx" id="fx-riv"></div></div>
   </section>
 
   <section class="card" id="how">
@@ -521,7 +532,9 @@ function renderLive(){var box=$('live'),keys=Object.keys(state.live||{});box.tex
 }
 
 /* ---------- simulador de resultados ---------- */
-var TRACK=[];FOCUS.forEach(function(f){TEAMS.forEach(function(o){if(o!==f){TRACK.push(f+'-'+o);if(FOCUS.indexOf(o)<0)TRACK.push(o+'-'+f)}})});
+/* todos os jogos são cruzados com a queda da dupla: os da dupla e os dos concorrentes ficam no simulador */
+var TRACK=[];TEAMS.forEach(function(h){TEAMS.forEach(function(a){if(h!==a)TRACK.push(h+'-'+a)})});
+var RIV_MIN=0.005; // concorrente: chance de queda de pelo menos 0,5% (sem resultados escolhidos)
 var LS_SIM='gn_sim_v1', sim={sel:lsGet(LS_SIM)||{}, res:null, timer:null, fromLink:false};
 /* ---------- compartilhar: os resultados escolhidos vão no link (#sim=mandante-visitante-resultado.…) ---------- */
 function simHash(sel){var ks=Object.keys(sel).sort();return ks.length?'#sim='+ks.map(function(k){return k+'-'+sel[k]}).join('.'):''}
@@ -549,6 +562,36 @@ function simCompute(){
 function simSchedule(){lsSet(LS_SIM,sim.sel);sim.fromLink=false;syncHash();renderSim(true);clearTimeout(sim.timer);
   sim.timer=setTimeout(function(){simCompute();renderSim()},60)}
 function pick(key,code){if(sim.sel[key]===code)delete sim.sel[key];else sim.sel[key]=code;simSchedule()}
+/* jogos restantes entre outros clubes em que ao menos um tem chance de cair (ou que já têm resultado escolhido) */
+function rivalGames(c){return c.remainingGames.filter(function(g){if(FOCUS.indexOf(g.h)>=0||FOCUS.indexOf(g.a)>=0)return false;
+  return c.probs[g.h]>=RIV_MIN||c.probs[g.a]>=RIV_MIN||sim.sel[g.h+'-'+g.a]!=null}).sort(function(a,b){return (a.date||'9')<(b.date||'9')?-1:1})}
+function renderRivals(c,r){var box=$('fx-riv');box.textContent='';
+  var list=rivalGames(c);
+  if(!list.length){box.appendChild(el('div','empty','Nenhum jogo entre concorrentes até o fim do campeonato.'));return}
+  list.forEach(function(g){var key=g.h+'-'+g.a,chosen=sim.sel[key];
+    var row=el('div','fxrow'),o=el('div','opp');o.appendChild(el('span','d',g.date?fmtDate(g.date):'a definir'));
+    o.appendChild(crest(g.h,20));o.appendChild(document.createTextNode(nm(g.h)+' x '+nm(g.a)));o.appendChild(crest(g.a,20));
+    if(g.live){var lb=el('span','livebadge');lb.appendChild(el('span','ldot'));lb.appendChild(document.createTextNode('ao vivo '+g.live.hs+'×'+g.live.as+' · '+g.live.detail));o.appendChild(lb)}
+    row.appendChild(o);
+    bindTip(o,function(){return tipCard(null,nm(g.h)+' x '+nm(g.a),g.date?fmtDate(g.date,{weekday:'long',day:'2-digit',month:'long',hour:'2-digit',minute:'2-digit'}):'data a definir',
+      [g.h,g.a].map(function(t){return [nm(t)+' · '+ord(state.rank.indexOf(t)+1),state.lt[t].p+' pts · queda '+pct(c.probs[t]),null,t]}))},false);
+    var pk=el('div','pick');
+    [[nm(g.h),0],['Empate',1],[nm(g.a),2]].forEach(function(x){
+      var code=x[1],pg=[g.pH,g.pD,g.pA][code],on=chosen===code,off=chosen!=null&&!on;
+      var b=el('button','pk n'+(on?' on':'')+(off?' off':''));b.type='button';b.dataset.pk=key+':'+code;b.setAttribute('aria-pressed',on?'true':'false');
+      var top=el('span','pk-l');top.appendChild(el('span','nm',(on?'✓ ':'')+x[0]));top.appendChild(el('span','num',Math.round(pg*100)+'%'));b.appendChild(top);
+      var v=el('span','pk-v2 num'),lab=[];
+      FOCUS.forEach(function(f){var q=condQ(r,key,code,f),s=el('span');s.appendChild(crest(f,14));s.appendChild(document.createTextNode(q==null?'—':pct(q)));
+        if(q!=null&&!on){var dq=q-r.probs[f];if(dq<-0.005)s.classList.add('down');else if(dq>0.005)s.classList.add('up')}
+        v.appendChild(s);lab.push('queda do '+nm(f)+' '+pct(q))});
+      b.appendChild(v);
+      b.setAttribute('aria-label',(code===1?'Empate em ':'Vitória do '+x[0]+' em ')+nm(g.h)+' x '+nm(g.a)+': '+lab.join(', ')+', chance do resultado '+pct(pg)+(on?', escolhido':''));
+      b.addEventListener('click',function(){pick(key,code)});
+      bindTip(b,function(){var res=sim.res||c,rows=[['Chance desse resultado',pct(pg)],'sep'];
+        FOCUS.forEach(function(f){var qf=condQ(res,key,code,f);rows.push(['Queda do '+nm(f),qf==null?'—':pct(qf),null,f])});
+        return tipCard(null,code===1?'Empate':'Vitória do '+x[0],off?'outro resultado está escolhido: toque para trocar':nm(g.h)+' x '+nm(g.a)+(g.date?' · '+fmtDate(g.date):''),rows)},false);
+      pk.appendChild(b)});
+    row.appendChild(pk);box.appendChild(row)})}
 function condQ(res,key,code,t){var cs=res.cond&&res.cond[key];return cs&&cs.n[code]>0?cs.rel[t][code]/cs.n[code]:null}
 function renderSim(pending){
   var c=state.cur,r=sim.res||c,nSel=Object.keys(sim.sel).length,box=$('fixtures');
@@ -594,7 +637,8 @@ function renderSim(pending){
           return tipCard(null,title,off?'outro resultado está escolhido: toque para trocar':nm(g.h)+' x '+nm(g.a)+(g.date?' · '+fmtDate(g.date):''),rows)},false);
         pk.appendChild(b)});
       row.appendChild(pk);box.appendChild(row)})});
-  if(keep){var f=box.querySelector('[data-pk="'+keep+'"]');if(f)f.focus()}
+  renderRivals(c,r);
+  if(keep){var f=$('fixtures').querySelector('[data-pk="'+keep+'"]');if(f)f.focus()}
 }
 /* ---------- como a conta é feita: passo a passo com os números do cálculo atual ---------- */
 var how={tab:'hoje',t:GRE,ex:null,exFor:null},HOW_TABS=['hoje','sim','upd'];
@@ -652,7 +696,7 @@ function howSim(c,t){
       '<tr><td><b>Total</b></td><td>'+SIMS.toLocaleString('pt-BR')+'</td><td>'+milhar(N)+'</td><td><b>'+pct(c.probs[t])+'</b></td></tr></tbody></table></div>'+
       '<p>No botão de vitória desse jogo, o número pequeno é a chance de o resultado acontecer (cerca de '+milhar(rows[0].n)+' em '+SIMS.toLocaleString('pt-BR')+', ou '+pc0(rows[0].n/SIMS)+'), e o número grande é a chance de queda dentro desse grupo: '+milhar(rows[0].k)+' ÷ '+milhar(rows[0].n)+' = <b>'+pct(rows[0].q)+'</b>. Somando os três grupos, volta-se aos '+pct(c.probs[t])+' de hoje.</p>');
     s+=step('Quando você escolhe um resultado','<p>As '+SIMS.toLocaleString('pt-BR')+' temporadas são refeitas do zero, mas, nesse jogo, o sorteio só aceita placares com o resultado escolhido: se você fixou a vitória do '+T+' e saiu um empate, sorteia de novo. Assim o placar continua realista (1×0, 2×1, às vezes 3×0), o que importa para o saldo de gols no desempate.</p>'+
-      '<p>Todos os outros jogos continuam sorteados normalmente, e, se você escolher vários resultados, todos valem juntos. O número no topo do simulador é a chance de queda nessas novas temporadas, e os botões dos outros jogos passam a contar só com elas. Por isso um jogo do Grêmio também mexe na chance do Inter: os dois disputam as mesmas vagas fora do Z-4.</p>');
+      '<p>Todos os outros jogos continuam sorteados normalmente, e, se você escolher vários resultados, todos valem juntos. O mesmo vale para os jogos dos concorrentes, mais abaixo no simulador. O número no topo do simulador é a chance de queda nessas novas temporadas, e os botões dos outros jogos passam a contar só com elas. Por isso um jogo do Grêmio também mexe na chance do Inter: os dois disputam as mesmas vagas fora do Z-4.</p>');
     var thin=rows.slice().sort(function(a,b){return a.n-b.n})[0];
     s+=step('Por que os valores oscilam um pouco','<p>Cada grupo tem menos temporadas que o total. '+thin.name+', por exemplo, aconteceu em só '+milhar(thin.n)+' das '+SIMS.toLocaleString('pt-BR')+'. Com menos sorteios, a margem cresce para cerca de ±'+pp(margin(thin.q,Math.max(1,thin.n)))+' ponto percentual, e um valor pode mudar um pouco quando você mexe em outro jogo.</p>');
   }else s+=step('Sem jogos para simular','<p>O '+T+' não tem mais jogos a disputar, então não há resultados para escolher.</p>');
