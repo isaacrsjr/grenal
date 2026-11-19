@@ -116,6 +116,11 @@ th.fcol,td.fcol{text-align:center}
 .cols h3,.rivals h3{font-size:18px;text-transform:uppercase;margin-bottom:8px}
 .rivals{margin-top:28px;padding-top:20px;border-top:1px solid var(--line)}
 .rivals .simhelp{margin-bottom:12px}
+.rivhead{display:flex;justify-content:space-between;align-items:center;gap:8px 16px;flex-wrap:wrap;margin-bottom:8px}
+.rivals .rivhead h3{margin-bottom:0}
+.rivsel{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.rivsel select{font:inherit;font-size:14px;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:5px 8px;max-width:100%;cursor:pointer}
+.rivsel select:focus-visible{outline:2px solid var(--gre);outline-offset:1px}
 .rivfx{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px 20px}
 .empty{color:var(--muted);padding:24px 0;text-align:center}
 .note{font-size:13px;color:var(--muted);max-width:75ch}
@@ -292,7 +297,8 @@ table.mini{width:auto;min-width:min(100%,380px);font-size:13px;margin:10px 0}
     <div class="simbar" id="simbar"></div>
     <p class="simhelp">Toque num resultado para fixá-lo; toque de novo para soltar. Em cada botão, o número grande é a chance de queda do clube se aquele resultado acontecer (levando em conta os outros já escolhidos) e o pequeno é a chance do próprio resultado. Como tudo vem de simulações, os valores podem oscilar cerca de 1 ponto entre um cálculo e outro. <a href="#how" id="howLink">Entenda a conta</a>.</p>
     <div class="cols"><div><h3 style="color:var(--gre)">Grêmio</h3><div class="fx" id="fx-6273"></div></div><div><h3 style="color:var(--int)">Internacional</h3><div class="fx" id="fx-1936"></div></div></div>
-    <div class="rivals"><h3>Jogos dos concorrentes</h3>
+    <div class="rivals"><div class="rivhead"><h3>Jogos dos concorrentes</h3>
+        <label class="rivsel">Clube <select id="rivFilter"><option value="">Todos os clubes</option></select></label></div>
       <p class="simhelp">Jogos que faltam entre os outros clubes com chance de cair. Em cada botão, os números grandes são a chance de queda do Grêmio e do Inter se aquele resultado acontecer, e o pequeno é a chance do próprio resultado.</p>
       <div class="rivfx" id="fx-riv"></div></div>
   </section>
@@ -535,6 +541,7 @@ function renderLive(){var box=$('live'),keys=Object.keys(state.live||{});box.tex
 /* todos os jogos são cruzados com a queda da dupla: os da dupla e os dos concorrentes ficam no simulador */
 var TRACK=[];TEAMS.forEach(function(h){TEAMS.forEach(function(a){if(h!==a)TRACK.push(h+'-'+a)})});
 var RIV_MIN=0.005; // concorrente: chance de queda de pelo menos 0,5% (sem resultados escolhidos)
+var LS_RIV='gn_riv_v1';
 var LS_SIM='gn_sim_v1', sim={sel:lsGet(LS_SIM)||{}, res:null, timer:null, fromLink:false};
 /* ---------- compartilhar: os resultados escolhidos vão no link (#sim=mandante-visitante-resultado.…) ---------- */
 function simHash(sel){var ks=Object.keys(sel).sort();return ks.length?'#sim='+ks.map(function(k){return k+'-'+sel[k]}).join('.'):''}
@@ -565,8 +572,18 @@ function pick(key,code){if(sim.sel[key]===code)delete sim.sel[key];else sim.sel[
 /* jogos restantes entre outros clubes em que ao menos um tem chance de cair (ou que já têm resultado escolhido) */
 function rivalGames(c){return c.remainingGames.filter(function(g){if(FOCUS.indexOf(g.h)>=0||FOCUS.indexOf(g.a)>=0)return false;
   return c.probs[g.h]>=RIV_MIN||c.probs[g.a]>=RIV_MIN||sim.sel[g.h+'-'+g.a]!=null}).sort(function(a,b){return (a.date||'9')<(b.date||'9')?-1:1})}
+/* filtro por clube: as opções são os concorrentes da lista, do maior risco para o menor */
+function rivalFilter(c,all){var sel=$('rivFilter'),cur=sel.value||lsGet(LS_RIV)||'',n={};
+  all.forEach(function(g){[g.h,g.a].forEach(function(t){if(c.probs[t]>=RIV_MIN||sim.sel[g.h+'-'+g.a]!=null)n[t]=(n[t]||0)+1})});
+  var ts=Object.keys(n).sort(function(a,b){return c.probs[b]-c.probs[a]||(nm(a)<nm(b)?-1:1)});
+  if(!n[cur])cur='';
+  sel.textContent='';sel.appendChild(new Option('Todos os clubes ('+all.length+(all.length===1?' jogo)':' jogos)'),''));
+  ts.forEach(function(t){sel.appendChild(new Option(nm(t)+' · queda '+pct(c.probs[t])+' · '+n[t]+(n[t]===1?' jogo':' jogos'),t))});
+  sel.value=cur;sel.disabled=!all.length;
+  if(!sel._bound){sel._bound=true;sel.addEventListener('change',function(){lsSet(LS_RIV,sel.value);renderRivals(state.cur,sim.res||state.cur)})}
+  return cur}
 function renderRivals(c,r){var box=$('fx-riv');box.textContent='';
-  var list=rivalGames(c);
+  var all=rivalGames(c),f=rivalFilter(c,all),list=f?all.filter(function(g){return g.h===f||g.a===f}):all;
   if(!list.length){box.appendChild(el('div','empty','Nenhum jogo entre concorrentes até o fim do campeonato.'));return}
   list.forEach(function(g){var key=g.h+'-'+g.a,chosen=sim.sel[key];
     var row=el('div','fxrow'),o=el('div','opp');o.appendChild(el('span','d',g.date?fmtDate(g.date):'a definir'));
