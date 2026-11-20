@@ -72,8 +72,8 @@
     var P=new Float64Array(n),Wn=new Float64Array(n),GD=new Float64Array(n),GF=new Float64Array(n),TB=new Float64Array(n),order=teams.map(function(_,i){return i;});
     var fixed=opts.fixed||{}, fx=remaining.map(function(g){var v=fixed[g.h+'-'+g.a];return v===0||v===1||v===2?v:-1;});
     var tkTeams=(opts.trackTeams||[]).map(function(t){return idx[t];});
-    var tk=[];(opts.track||[]).forEach(function(key){for(var j=0;j<remaining.length;j++)if(remaining[j].h+'-'+remaining[j].a===key)tk.push({key:key,k:j,n:[0,0,0],rel:tkTeams.map(function(){return [0,0,0];})});});
-    var oc=new Int8Array(remaining.length),relNow=new Uint8Array(n);
+    var tk=[];(opts.track||[]).forEach(function(key){for(var j=0;j<remaining.length;j++)if(remaining[j].h+'-'+remaining[j].a===key)tk.push({key:key,k:j,n:[0,0,0],rel:tkTeams.map(function(){return [0,0,0];}),pos:tkTeams.map(function(){return new Int32Array(3*n);})});});
+    var oc=new Int8Array(remaining.length),relNow=new Uint8Array(n),posNow=new Int8Array(n);
     for(var s=0;s<nSims;s++){
       for(var i=0;i<n;i++){var b=base[teams[i]];P[i]=b.p;Wn[i]=b.w;GD[i]=b.gd;GF[i]=b.gf;TB[i]=rnd();}
       HP.set(HP0);
@@ -84,13 +84,14 @@
         GF[hi]+=x;GF[ai]+=y;GD[hi]+=x-y;GD[ai]+=y-x;if(x>y){P[hi]+=3;Wn[hi]++;HP[hi*n+ai]+=3;}else if(x<y){P[ai]+=3;Wn[ai]++;HP[ai*n+hi]+=3;}else{P[hi]++;P[ai]++;HP[hi*n+ai]++;HP[ai*n+hi]++;}}
       order.sort(function(a,b){return P[b]-P[a]||Wn[b]-Wn[a]||GD[b]-GD[a]||GF[b]-GF[a]||TB[b]-TB[a];});
       headToHead(order,same,hp);
-      for(var r=0;r<n;r++){var t=teams[order[r]];posHist[t][r]++;relNow[order[r]]=r>=n-4?1:0;if(r>=n-4)rel[t]++;pts[t]+=P[order[r]];}
-      for(var q=0;q<tk.length;q++){var o=oc[tk[q].k];tk[q].n[o]++;for(var z=0;z<tkTeams.length;z++)tk[q].rel[z][o]+=relNow[tkTeams[z]];}
+      for(var r=0;r<n;r++){var t=teams[order[r]];posHist[t][r]++;relNow[order[r]]=r>=n-4?1:0;posNow[order[r]]=r;if(r>=n-4)rel[t]++;pts[t]+=P[order[r]];}
+      for(var q=0;q<tk.length;q++){var o=oc[tk[q].k];tk[q].n[o]++;for(var z=0;z<tkTeams.length;z++){tk[q].rel[z][o]+=relNow[tkTeams[z]];tk[q].pos[z][o*n+posNow[tkTeams[z]]]++;}}
     }
     var out={probs:{},expPts:{},posHist:{},table:{},played:played.length,remaining:remaining.length,model:model};
     teams.forEach(function(t){out.probs[t]=rel[t]/nSims;out.expPts[t]=pts[t]/nSims;out.posHist[t]=posHist[t].map(function(c){return c/nSims;});out.table[t]=base[t];});
     /* cond["h-a"] = { n:[mandante,empate,visitante], rel:{ clube:[...] } } — simulações por resultado e quedas em cada uma */
-    out.cond={};tk.forEach(function(c){var rl={};(opts.trackTeams||[]).forEach(function(t,z){rl[t]=c.rel[z];});out.cond[c.key]={n:c.n,rel:rl};});
+    /* pos: { clube:[[contagem por posição final]×3 resultados] } */
+    out.cond={};tk.forEach(function(c){var rl={},ps={};(opts.trackTeams||[]).forEach(function(t,z){rl[t]=c.rel[z];ps[t]=[0,1,2].map(function(o){return Array.prototype.slice.call(c.pos[z],o*n,o*n+n);});});out.cond[c.key]={n:c.n,rel:rl,pos:ps};});
     out.remainingGames=remaining.map(function(g,k){var p=wdl(lam[k][0],lam[k][1],lv[k]?lv[k].hs:0,lv[k]?lv[k].as:0);var r={h:g.h,a:g.a,date:g.date,pH:p[0],pD:p[1],pA:p[2]};if(lv[k])r.live=live[g.h+'-'+g.a];return r;});
     out.live=lv.filter(Boolean).length;
     return out;
