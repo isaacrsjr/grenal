@@ -297,7 +297,7 @@ table.mini{width:auto;min-width:min(100%,380px);font-size:13px;margin:10px 0}
   <section class="card" id="fixtures">
     <header><h2>Simulador · jogos que faltam</h2><span class="eyebrow">escolha os resultados</span></header>
     <div class="simbar" id="simbar"></div>
-    <p class="simhelp">Toque num resultado para fixá-lo; toque de novo para soltar. Em cada botão, o número grande é a chance de queda do clube se aquele resultado acontecer (levando em conta os outros já escolhidos), o pequeno é a chance do próprio resultado e, embaixo, a posição final estimada do clube nesse caso (a do meio das temporadas simuladas; a faixa aparece ao passar o mouse). Como tudo vem de simulações, os valores podem oscilar cerca de 1 ponto entre um cálculo e outro. <a href="#how" id="howLink">Entenda a conta</a>.</p>
+    <p class="simhelp">Toque num resultado para fixá-lo; toque de novo para soltar. Em cada botão, o número grande é a chance de queda do clube se aquele resultado acontecer (levando em conta os outros já escolhidos), o pequeno é a chance do próprio resultado e, embaixo, a posição final estimada do clube nesse caso (a do meio das temporadas simuladas; a faixa aparece ao passar o mouse). Num jogo com resultado escolhido, os outros botões mostram como ficaria se você trocasse para eles. Como tudo vem de simulações, os valores podem oscilar cerca de 1 ponto entre um cálculo e outro. <a href="#how" id="howLink">Entenda a conta</a>.</p>
     <div class="cols"><div><h3 style="color:var(--gre)">Grêmio</h3><div class="fx" id="fx-6273"></div></div><div><h3 style="color:var(--int)">Internacional</h3><div class="fx" id="fx-1936"></div></div></div>
     <div class="rivals"><div class="rivhead"><h3>Jogos dos concorrentes</h3>
         <label class="rivsel">Clube <select id="rivFilter"><option value="">Todos os clubes</option></select></label></div>
@@ -327,7 +327,7 @@ table.mini{width:auto;min-width:min(100%,380px);font-size:13px;margin:10px 0}
 </div>
 
 <!-- O GitHub Pages deixa os arquivos em cache por 10 min: troque o ?v= sempre que mudar model.js ou core.js -->
-<script src="model.js?v=2026-10-29"></script>
+<script src="model.js?v=2026-11-20"></script>
 <script src="core.js?v=2026-11-07"></script>
 <script>
 (function(){
@@ -544,7 +544,7 @@ function renderLive(){var box=$('live'),keys=Object.keys(state.live||{});box.tex
 var TRACK=[];TEAMS.forEach(function(h){TEAMS.forEach(function(a){if(h!==a)TRACK.push(h+'-'+a)})});
 var RIV_MIN=0.005; // concorrente: chance de queda de pelo menos 0,5% (sem resultados escolhidos)
 var LS_RIV='gn_riv_v1';
-var LS_SIM='gn_sim_v1', sim={sel:lsGet(LS_SIM)||{}, res:null, timer:null, fromLink:false};
+var LS_SIM='gn_sim_v1', sim={sel:lsGet(LS_SIM)||{}, res:null, timer:null, fromLink:false, alt:{}, altGen:0};
 /* ---------- compartilhar: os resultados escolhidos vão no link (#sim=mandante-visitante-resultado.…) ---------- */
 function simHash(sel){var ks=Object.keys(sel).sort();return ks.length?'#sim='+ks.map(function(k){return k+'-'+sel[k]}).join('.'):''}
 function readHash(){var m=/^#sim=([\d.-]+)$/.exec(location.hash);if(!m)return null;var sel={};
@@ -567,7 +567,16 @@ function simCompute(){
   if(!state.cur.tracked)state.cur=compute(Date.now()); // o cálculo do histórico não cruza os jogos da dupla
   Object.keys(sim.sel).forEach(function(k){if(!state.cur.cond[k])delete sim.sel[k]}); // jogo já disputado
   sim.res=Object.keys(sim.sel).length?compute(Date.now(),sim.sel):state.cur;
+  simAlt();
 }
+/* Num jogo com resultado escolhido, os outros dois resultados não acontecem em nenhuma temporada. Para os botões deles
+   mostrarem "e se eu trocar para este?", refaz o cálculo sem esse jogo fixado (os demais continuam), um jogo por vez */
+function simAlt(){var gen=++sim.altGen,keys=Object.keys(sim.sel);sim.alt={};
+  (function next(i){if(gen!==sim.altGen||i>=keys.length)return;setTimeout(function(){if(gen!==sim.altGen)return;
+    var fx=Object.assign({},sim.sel);delete fx[keys[i]];sim.alt[keys[i]]=compute(Date.now(),fx);
+    if(i===keys.length-1)renderSim();next(i+1)},0)})(0)}
+/* resultado de onde saem os números de um botão: o cálculo atual ou, se outro resultado está escolhido no jogo, o cálculo sem ele */
+function resFor(key,code){var o=sim.sel[key];return o!=null&&o!==code?sim.alt[key]||{}:sim.res||state.cur}
 function simSchedule(){lsSet(LS_SIM,sim.sel);sim.fromLink=false;syncHash();renderSim(true);clearTimeout(sim.timer);
   sim.timer=setTimeout(function(){simCompute();renderSim()},60)}
 function pick(key,code){if(sim.sel[key]===code)delete sim.sel[key];else sim.sel[key]=code;simSchedule()}
@@ -600,16 +609,17 @@ function renderRivals(c,r){var box=$('fx-riv');box.textContent='';
       var b=el('button','pk n'+(on?' on':'')+(off?' off':''));b.type='button';b.dataset.pk=key+':'+code;b.setAttribute('aria-pressed',on?'true':'false');
       var top=el('span','pk-l');top.appendChild(el('span','nm',(on?'✓ ':'')+x[0]));top.appendChild(el('span','num',Math.round(pg*100)+'%'));b.appendChild(top);
       var v=el('span','pk-v2 num'),lab=[];
-      FOCUS.forEach(function(f){var q=condQ(r,key,code,f),ps=condPos(r,key,code,f),s=el('span');s.appendChild(crest(f,14));s.appendChild(document.createTextNode(q==null?'—':pct(q)));
+      var rr=resFor(key,code);
+      FOCUS.forEach(function(f){var q=condQ(rr,key,code,f),ps=condPos(rr,key,code,f),s=el('span');s.appendChild(crest(f,14));s.appendChild(document.createTextNode(q==null?'—':pct(q)));
         if(q!=null&&!on){var dq=q-r.probs[f];if(dq<-0.005)s.classList.add('down');else if(dq>0.005)s.classList.add('up')}
         if(ps)s.appendChild(el('span','pp','~'+ord(ps.med)));
         v.appendChild(s);lab.push('queda do '+nm(f)+' '+pct(q)+(ps?', termina em '+ord(ps.med):''))});
       b.appendChild(v);
       b.setAttribute('aria-label',(code===1?'Empate em ':'Vitória do '+x[0]+' em ')+nm(g.h)+' x '+nm(g.a)+': '+lab.join(', ')+', chance do resultado '+pct(pg)+(on?', escolhido':''));
       b.addEventListener('click',function(){pick(key,code)});
-      bindTip(b,function(){var res=sim.res||c,rows=[['Chance desse resultado',pct(pg)],'sep'];
+      bindTip(b,function(){var res=resFor(key,code),rows=[['Chance desse resultado',pct(pg)],'sep'];
         FOCUS.forEach(function(f){var qf=condQ(res,key,code,f);rows.push(['Queda do '+nm(f),qf==null?'—':pct(qf),null,f],['Posição final estimada',posTxt(condPos(res,key,code,f))])});
-        return tipCard(null,code===1?'Empate':'Vitória do '+x[0],off?'outro resultado está escolhido: toque para trocar':nm(g.h)+' x '+nm(g.a)+(g.date?' · '+fmtDate(g.date):''),rows)},false);
+        return tipCard(null,code===1?'Empate':'Vitória do '+x[0],off?'se trocar para este resultado (toque para trocar)':nm(g.h)+' x '+nm(g.a)+(g.date?' · '+fmtDate(g.date):''),rows)},false);
       pk.appendChild(b)});
     row.appendChild(pk);box.appendChild(row)})}
 /* posição final do clube nas temporadas em que o jogo teve aquele resultado: a do meio (mediana) e a faixa da metade central.
@@ -651,16 +661,16 @@ function renderSim(pending){
           [nm(opp)+' · '+ord(op),oc.p+' pts',null,opp],['Chance de queda dele',pct(c.probs[opp])]])},false);
       var pk=el('div','pick');
       [['w','Vitória',home?0:2],['e','Empate',1],['l','Derrota',home?2:0]].forEach(function(x){
-        var code=x[2],pg=[g.pH,g.pD,g.pA][code],on=chosen===code,off=chosen!=null&&!on,q=condQ(r,key,code,t);
+        var code=x[2],pg=[g.pH,g.pD,g.pA][code],on=chosen===code,off=chosen!=null&&!on,rr=resFor(key,code),q=condQ(rr,key,code,t);
         var b=el('button','pk '+x[0]+(on?' on':'')+(off?' off':''));b.type='button';b.dataset.pk=key+':'+code;b.setAttribute('aria-pressed',on?'true':'false');
         var top=el('span','pk-l');top.appendChild(el('span',null,(on?'✓ ':'')+x[1]));top.appendChild(el('span','num',Math.round(pg*100)+'%'));b.appendChild(top);
-        var v=el('span','pk-v num',q==null?'—':pct(q));if(q!=null&&!on){var dq=q-r.probs[t];if(dq<-0.005)v.classList.add('down');else if(dq>0.005)v.classList.add('up')}b.appendChild(v);var ps=condPos(r,key,code,t);b.appendChild(el('span','pk-p num',ps?'final ~'+ord(ps.med):'—'));
+        var v=el('span','pk-v num',q==null?'—':pct(q));if(q!=null&&!on){var dq=q-r.probs[t];if(dq<-0.005)v.classList.add('down');else if(dq>0.005)v.classList.add('up')}b.appendChild(v);var ps=condPos(rr,key,code,t);b.appendChild(el('span','pk-p num',ps?'final ~'+ord(ps.med):'—'));
         b.setAttribute('aria-label',x[1]+' contra '+nm(opp)+': '+(q==null?'':'chance de queda '+pct(q)+', ')+(ps?'posição final estimada '+ord(ps.med)+', ':'')+'chance do resultado '+pct(pg)+(on?', escolhido':''));
         b.addEventListener('click',function(){pick(key,code)});
-        bindTip(b,function(){var res=sim.res||c,rows=[['Chance desse resultado',pct(pg)],'sep'];
+        bindTip(b,function(){var res=resFor(key,code),rows=[['Chance desse resultado',pct(pg)],'sep'];
           FOCUS.forEach(function(f){var qf=condQ(res,key,code,f);rows.push(['Queda do '+nm(f),qf==null?'—':pct(qf),null,f],['Posição final estimada',posTxt(condPos(res,key,code,f))])});
           var title=x[0]==='e'?'Empate com '+nm(opp):(x[0]==='w'?'Vitória':'Derrota')+' do '+nm(t);
-          return tipCard(null,title,off?'outro resultado está escolhido: toque para trocar':nm(g.h)+' x '+nm(g.a)+(g.date?' · '+fmtDate(g.date):''),rows)},false);
+          return tipCard(null,title,off?'se trocar para este resultado (toque para trocar)':nm(g.h)+' x '+nm(g.a)+(g.date?' · '+fmtDate(g.date):''),rows)},false);
         pk.appendChild(b)});
       row.appendChild(pk);box.appendChild(row)})});
   renderRivals(c,r);
